@@ -142,12 +142,7 @@ public final class FakeFluids {
                         if (stack == null) {
                             return null;
                         }
-                        IAEFluidStack fluidStack = AEFluidStack.fromFluidStack(getStack(stack.createItemStack()));
-                        if (fluidStack == null) {
-                            return null;
-                        }
-                        fluidStack.setStackSize(stack.getStackSize());
-                        return fluidStack;
+                        return AEFluidStack.fromFluidStack(getStack(stack.createItemStack()));
                     }
 
                     @Override

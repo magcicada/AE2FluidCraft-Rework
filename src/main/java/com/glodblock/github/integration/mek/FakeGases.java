@@ -140,9 +140,7 @@ public class FakeGases {
                         if (gas == null || gas.getGas() == null) {
                             return null;
                         }
-                        IAEGasStack gasStack = new AEGasStack(gas);
-                        gasStack.setStackSize(stack.getStackSize());
-                        return gasStack;
+                        return new AEGasStack(gas);
                     }
 
                     @Override
