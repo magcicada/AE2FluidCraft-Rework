@@ -73,6 +73,7 @@ ae2fc.tooltip.block_item=Block Item
 ae2fc.tooltip.block_item.hint=Blocking mode only checks item.
 ae2fc.tooltip.block_fluid=Block Fluid
 ae2fc.tooltip.block_fluid.hint=Blocking mode only checks fluid.
+ae2fc.tooltip.pattern_encoder.name=Encoded By %s
 
 ae2fc.pauto.fluid_processing.name=Fluid Processing
 ae2fc.pauto.fluid_processing.name_short=Fluid

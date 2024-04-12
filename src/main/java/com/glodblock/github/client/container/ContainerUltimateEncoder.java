@@ -250,6 +250,7 @@ public class ContainerUltimateEncoder extends AEBaseContainer implements IOption
         FluidPatternDetails pattern = new FluidPatternDetails(patternStack);
         pattern.setInputs(collectInventory(craftingSlots));
         pattern.setOutputs(collectInventory(outputSlots));
+        pattern.setEncoder(this.getInventoryPlayer().player.getGameProfile());
         patternSlotOUT.putStack(pattern.writeToStack());
     }
 
@@ -298,6 +299,7 @@ public class ContainerUltimateEncoder extends AEBaseContainer implements IOption
         FluidPatternDetails pattern = new FluidPatternDetails(patternStack);
         pattern.setInputs(collectInventory(craftingSlots));
         pattern.setOutputs(collectInventory(outputSlots));
+        pattern.setEncoder(this.getInventoryPlayer().player.getGameProfile());
         patternSlotOUT.putStack(pattern.writeToStack());
     }
 

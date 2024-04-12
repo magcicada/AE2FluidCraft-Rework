@@ -100,6 +100,7 @@ public class ContainerFluidPatternEncoder extends AEBaseContainer implements Pat
             FluidPatternDetails pattern = new FluidPatternDetails(patternStack);
             pattern.setInputs(collectAeInventory(tile.getCraftingSlots()));
             pattern.setOutputs(collectAeInventory(tile.getOutputSlots()));
+            pattern.setEncoder(this.getInventoryPlayer().player.getGameProfile());
             tile.getInventory().setStackInSlot(1, pattern.writeToStack());
         }
     }

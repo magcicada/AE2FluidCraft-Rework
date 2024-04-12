@@ -3,6 +3,7 @@ package com.glodblock.github.util;
 import appeng.api.networking.crafting.ICraftingPatternDetails;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.util.item.AEItemStack;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,6 +22,8 @@ public class FluidPatternDetails implements ICraftingPatternDetails, Comparable<
     private IAEItemStack patternStackAe;
     private IAEItemStack[] inputs = null, inputsCond = null, outputs = null, outputsCond = null;
     private int priority = 0;
+    private String encoderName = "";
+    private String encoderID = "";
 
     public FluidPatternDetails(ItemStack stack) {
         this.patternStack = stack;
@@ -75,6 +78,11 @@ public class FluidPatternDetails implements ICraftingPatternDetails, Comparable<
         this.inputs = inputs;
         this.inputsCond = condensed;
         return true;
+    }
+
+    public void setEncoder(GameProfile profile) {
+        this.encoderName = profile.getName();
+        this.encoderID = profile.getId().toString();
     }
 
     @Override
@@ -162,6 +170,13 @@ public class FluidPatternDetails implements ICraftingPatternDetails, Comparable<
         //I have to keep both to maintain the back capacity.
         tag.setTag("in", writeStackArray(checkInitialized(inputs)));
         tag.setTag("out", writeStackArray(checkInitialized(outputs)));
+        //encoder info
+        if (!this.encoderName.isEmpty()) {
+            tag.setString("encoderName", this.encoderName);
+        }
+        if (!this.encoderID.isEmpty()) {
+            tag.setString("encoderID", this.encoderID);
+        }
         patternStack.setTagCompound(tag);
         patternStackAe = Objects.requireNonNull(AEItemStack.fromItemStack(patternStack));
         return patternStack;
@@ -185,6 +200,8 @@ public class FluidPatternDetails implements ICraftingPatternDetails, Comparable<
             return false;
         }
         NBTTagCompound tag = Objects.requireNonNull(patternStack.getTagCompound());
+        this.encoderName = tag.getString("encoderName");
+        this.encoderName = tag.getString("encoderID");
         // may be possible to enter a partially-correct state if setInputs succeeds but setOutputs failed
         // but outside code should treat it as completely incorrect and not attempt to make calls
         return setInputs(readStackArray(tag.getTagList("Inputs", Constants.NBT.TAG_COMPOUND), 100))

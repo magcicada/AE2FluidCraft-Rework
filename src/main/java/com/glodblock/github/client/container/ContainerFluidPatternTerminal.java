@@ -192,6 +192,7 @@ public class ContainerFluidPatternTerminal extends ContainerPatternTerm implemen
         FluidPatternDetails pattern = new FluidPatternDetails(patternStack);
         pattern.setInputs(collectInventory(craftingSlots));
         pattern.setOutputs(collectInventory(outputSlots));
+        pattern.setEncoder(this.getInventoryPlayer().player.getGameProfile());
         patternSlotOUT.putStack(pattern.writeToStack());
     }
 
