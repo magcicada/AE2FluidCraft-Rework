@@ -15,6 +15,7 @@ import appeng.container.implementations.ContainerPriority;
 import appeng.fluids.helper.IFluidInterfaceHost;
 import appeng.helpers.IInterfaceHost;
 import appeng.helpers.WirelessTerminalGuiObject;
+import baubles.api.BaublesApi;
 import com.glodblock.github.client.GuiBurette;
 import com.glodblock.github.client.GuiExtendedFluidPatternTerminal;
 import com.glodblock.github.client.GuiFCCraftAmount;
@@ -69,6 +70,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -431,12 +434,28 @@ public enum GuiType {
         @Nullable
         @Override
         protected T getInventory(TileEntity tile, EntityPlayer player, EnumFacing face, BlockPos pos) {
-            ItemStack hold = player.getHeldItem(EnumHand.values()[face.ordinal() % 2]);
-            if (pos.getZ() == Integer.MIN_VALUE && !hold.isEmpty()) {
-                Object holder = getItemGuiObject(hold, player, player.world, pos.getX(), pos.getY(), pos.getZ());
+            if (pos.getZ() == Integer.MIN_VALUE) {
+                ItemStack terminal = ItemStack.EMPTY;
+                if (pos.getY() == 0) { // main inventory
+                    terminal = player.inventory.getStackInSlot(pos.getX());
+                } else if (pos.getY() == 1 && Loader.isModLoaded("baubles")) { // baubles inventory
+                    terminal = getStackInBaubleSlot(player, pos.getX());
+                }
+                if (terminal == null || terminal.isEmpty()) {
+                    return null;
+                }
+                Object holder = getItemGuiObject(terminal, player, player.world, pos.getX(), pos.getY(), pos.getZ());
                 if (invClass.isInstance(holder)) {
                     return invClass.cast(holder);
                 }
+            }
+            return null;
+        }
+
+        @Optional.Method(modid = "baubles")
+        private static ItemStack getStackInBaubleSlot(EntityPlayer player, int slot) {
+            if (slot >= 0 && slot < BaublesApi.getBaublesHandler(player).getSlots()) {
+                return BaublesApi.getBaublesHandler(player).getStackInSlot(slot);
             }
             return null;
         }

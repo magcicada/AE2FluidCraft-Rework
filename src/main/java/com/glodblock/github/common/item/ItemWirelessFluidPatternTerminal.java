@@ -15,7 +15,7 @@ public class ItemWirelessFluidPatternTerminal extends ToolWirelessTerminal {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer player, EnumHand hand) {
-        Util.openWirelessTerminal(player.getHeldItem(hand), hand, w, player, GuiType.WIRELESS_FLUID_PATTERN_TERMINAL);
+        Util.openWirelessTerminal(player.getHeldItem(hand), hand == EnumHand.MAIN_HAND ? player.inventory.currentItem : 40, false, w, player, GuiType.WIRELESS_FLUID_PATTERN_TERMINAL);
         return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
     }
 
