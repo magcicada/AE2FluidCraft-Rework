@@ -13,9 +13,11 @@ import net.minecraft.world.World;
 
 public class ItemWirelessFluidPatternTerminal extends ToolWirelessTerminal {
 
+    private static final int OFFHAND_SLOT = 40;
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(World w, EntityPlayer player, EnumHand hand) {
-        Util.openWirelessTerminal(player.getHeldItem(hand), hand == EnumHand.MAIN_HAND ? player.inventory.currentItem : 40, false, w, player, GuiType.WIRELESS_FLUID_PATTERN_TERMINAL);
+        Util.openWirelessTerminal(player.getHeldItem(hand), hand == EnumHand.MAIN_HAND ? player.inventory.currentItem : OFFHAND_SLOT, false, w, player, GuiType.WIRELESS_FLUID_PATTERN_TERMINAL);
         return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
     }
 
