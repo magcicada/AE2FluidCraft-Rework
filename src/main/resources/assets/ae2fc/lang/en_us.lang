@@ -1,5 +1,8 @@
 itemGroup.ae2fc=AE2 Fluid Crafting
 
+key.ae2fc.category=AE2 Fluid Crafting
+key.ae2fc.open_wireless_fluid_pattern_terminal.desc=Open Wireless Fluid Pattern Terminal
+
 tile.ae2fc:fluid_discretizer.name=ME Fluid Discretizer
 tile.ae2fc:gas_discretizer.name=ME Gas Discretizer
 tile.ae2fc:fluid_pattern_encoder.name=Fluid Pattern Encoder

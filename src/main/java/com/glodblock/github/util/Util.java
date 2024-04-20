@@ -375,7 +375,7 @@ public final class Util {
         }
     }
 
-    public static void openWirelessTerminal(ItemStack item, EnumHand hand, World w, EntityPlayer player, GuiType gui) {
+    public static void openWirelessTerminal(ItemStack item, int playerInvSlot, boolean isBaubleSlot, World w, EntityPlayer player, GuiType gui) {
         IWirelessTermRegistry registry = AEApi.instance().registries().wireless();
         if (Platform.isClient()) {
             return;
@@ -397,15 +397,7 @@ public final class Util {
             return;
         }
         if (handler.hasPower(player, 0.5, item)) {
-            int x, y;
-            if (player.openContainer instanceof IInventorySlotAware) {
-                x = ((IInventorySlotAware) player.openContainer).getInventorySlot();
-                y = ((IInventorySlotAware) player.openContainer).isBaubleSlot() ? 1 : 0;
-            } else {
-                x = player.inventory.currentItem;
-                y = 0;
-            }
-            InventoryHandler.openGui(player, w, new BlockPos(x, y, Integer.MIN_VALUE), EnumFacing.values()[hand.ordinal()], gui);
+            InventoryHandler.openGui(player, w, new BlockPos(playerInvSlot, isBaubleSlot ? 1 : 0, Integer.MIN_VALUE), EnumFacing.DOWN, gui);
         } else {
             player.sendMessage(PlayerMessages.DeviceNotPowered.get());
         }
