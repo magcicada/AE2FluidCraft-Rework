@@ -225,7 +225,21 @@ public class ContainerUltimateEncoder extends AEBaseContainer implements IOption
 
     public void encode() {
         if (!checkHasFluidPattern()) {
-            encodeItem();
+            ItemStack stack = this.patternSlotOUT.getStack();
+            if (stack.isEmpty()) {
+                stack = this.patternSlotIN.getStack();
+                if (stack.isEmpty() || notPattern(stack)) {
+                    return;
+                }
+                if (stack.getCount() == 1) {
+                    this.patternSlotIN.putStack(ItemStack.EMPTY);
+                } else {
+                    stack.shrink(1);
+                }
+                encodeItem();
+            } else if (!notPattern(stack)) {
+                encodeItem();
+            }
             return;
         }
         ItemStack stack = this.patternSlotOUT.getStack();
@@ -338,7 +352,8 @@ public class ContainerUltimateEncoder extends AEBaseContainer implements IOption
         if (output.isEmpty()) {
             return true;
         }
-        if (output.getItem() instanceof ItemFluidEncodedPattern) {
+        if (output.getItem() == FCItems.DENSE_ENCODED_PATTERN ||
+                output.getItem() == FCItems.LARGE_ITEM_ENCODED_PATTERN) {
             return false;
         }
         final IDefinitions defs = AEApi.instance().definitions();
