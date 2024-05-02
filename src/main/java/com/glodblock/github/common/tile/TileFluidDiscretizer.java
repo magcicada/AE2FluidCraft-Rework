@@ -131,8 +131,7 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
     @Nullable
     private IMEMonitor<IAEFluidStack> getFluidGrid() {
         try {
-            return getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class)
-                    .getInventory(Util.getFluidChannel());
+            return getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class).getInventory(Util.getFluidChannel());
         } catch (GridAccessException e) {
             return null;
         }
@@ -221,16 +220,15 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
                     boolean isNg = false;
                     if (fluidStack.getStackSize() < 0) {
                         isNg = true;
-                        fluidStack.setStackSize( - fluidStack.getStackSize() );
+                        fluidStack.setStackSize(-fluidStack.getStackSize());
                     }
                     IAEItemStack itemStack = FakeFluids.packFluid2AEDrops(fluidStack);
                     if (itemStack != null) {
-                        if (isNg) itemStack.setStackSize( - itemStack.getStackSize() );
+                        if (isNg) itemStack.setStackSize(-itemStack.getStackSize());
                         mappedChanges.add(itemStack);
                     }
                 }
-                getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class)
-                        .postAlterationOfStoredItems(getChannel(), mappedChanges, ownActionSource);
+                getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class).postAlterationOfStoredItems(getChannel(), mappedChanges, ownActionSource);
             } catch (GridAccessException e) {
                 // NO-OP
             }
@@ -271,8 +269,7 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
                 return null;
             }
             if (craftingGrid instanceof CraftingGridCache) {
-                IAEItemStack remaining = ((CraftingGridCache)craftingGrid).injectItems(
-                        FakeFluids.packFluid2AEDrops(input), type, ownActionSource);
+                IAEItemStack remaining = ((CraftingGridCache)craftingGrid).injectItems(FakeFluids.packFluid2AEDrops(input), type, ownActionSource);
                 if (remaining != null) {
                     return FakeItemRegister.getAEStack(remaining);
                 }
