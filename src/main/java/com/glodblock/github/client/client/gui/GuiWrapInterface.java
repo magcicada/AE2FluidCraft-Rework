@@ -31,11 +31,11 @@ public class GuiWrapInterface extends GuiInterface {
     @Override
     protected void addButtons() {
         super.addButtons();
-        fluidPacketBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 44, "SEND_MODE", "REAL_FLUID");
+        fluidPacketBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 62, "SEND_MODE", "REAL_FLUID");
         buttonList.add(fluidPacketBtn);
-        splittingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 62, "SPLITTING", "ALLOW");
+        splittingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 80, "SPLITTING", "ALLOW");
         buttonList.add(splittingBtn);
-        blockingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 80, "BLOCK", "ALL");
+        blockingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 98, "BLOCK", "ALL");
         buttonList.add(blockingBtn);
     }
 
