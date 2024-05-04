@@ -14,6 +14,7 @@ import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartModel;
+import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.util.AECableType;
 import appeng.api.util.IConfigManager;
@@ -32,6 +33,7 @@ import appeng.util.inv.IInventoryDestination;
 import appeng.util.inv.InvOperation;
 import com.glodblock.github.FluidCraft;
 import com.glodblock.github.common.component.DualityDualInterface;
+import com.glodblock.github.common.item.fake.FakeFluids;
 import com.glodblock.github.interfaces.FCPriorityHost;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.inventory.InventoryHandler;
@@ -170,6 +172,16 @@ public class PartDualInterface extends PartBasicState
     public void onChangeInventory(final IItemHandler inv, final int slot, final InvOperation mc,
                                   final ItemStack removedStack, final ItemStack newStack) {
         duality.onItemInventoryChange(inv, slot, mc, removedStack, newStack);
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEFluidStack stack) {
+        this.duality.getItemInterface().onStackReturnedToNetwork(FakeFluids.packFluid2AEDrops(stack));
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEItemStack stack) {
+        this.duality.getItemInterface().onStackReturnedToNetwork(stack);
     }
 
     @Override

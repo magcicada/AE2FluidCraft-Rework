@@ -12,6 +12,7 @@ import appeng.api.networking.events.MENetworkPowerStatusChange;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
+import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
@@ -27,6 +28,7 @@ import appeng.util.SettingsFrom;
 import appeng.util.inv.IInventoryDestination;
 import appeng.util.inv.InvOperation;
 import com.glodblock.github.common.component.DualityDualInterface;
+import com.glodblock.github.common.item.fake.FakeFluids;
 import com.glodblock.github.interfaces.FCPriorityHost;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.loader.FCBlocks;
@@ -203,6 +205,16 @@ public class TileDualInterface extends AENetworkInvTile
     public void onChangeInventory(final IItemHandler inv, final int slot, final InvOperation mc,
                                   final ItemStack removed, final ItemStack added) {
         duality.onItemInventoryChange(inv, slot, mc, removed, added);
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEFluidStack stack) {
+        duality.getItemInterface().onStackReturnedToNetwork(FakeFluids.packFluid2AEDrops(stack));
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEItemStack stack) {
+        duality.getItemInterface().onStackReturnedToNetwork(stack);
     }
 
     @Override
