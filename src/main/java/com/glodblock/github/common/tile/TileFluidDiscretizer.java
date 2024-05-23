@@ -64,12 +64,16 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
     @SuppressWarnings("rawtypes")
     @Override
     public List<IMEInventoryHandler> getCellArray(IStorageChannel<?> channel) {
-        if (getProxy().isActive()) {
-            if (channel == Util.getItemChannel()) {
-                return Collections.singletonList(fluidDropInv.invHandler);
-            } else if (channel == Util.getFluidChannel()) {
-                return Collections.singletonList(fluidCraftInv.invHandler);
+        try {
+            if (getProxy().isActive() && getProxy().getGrid().getMachines(this.getClass()).size() < 2) {
+                if (channel == Util.getItemChannel()) {
+                    return Collections.singletonList(fluidDropInv.invHandler);
+                } else if (channel == Util.getFluidChannel()) {
+                    return Collections.singletonList(fluidCraftInv.invHandler);
+                }
             }
+        } catch (GridAccessException e) {
+            //NO-OP
         }
         return Collections.emptyList();
     }
