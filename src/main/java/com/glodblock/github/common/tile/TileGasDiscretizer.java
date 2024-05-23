@@ -66,12 +66,16 @@ public class TileGasDiscretizer extends AENetworkTile implements ICellContainer 
     @SuppressWarnings("rawtypes")
     @Override
     public List<IMEInventoryHandler> getCellArray(IStorageChannel<?> channel) {
-        if (getProxy().isActive()) {
-            if (channel == Util.getItemChannel()) {
-                return Collections.singletonList(gasDropInv.invHandler);
-            } else if (channel == getGasChannel()) {
-                return Collections.singletonList(gasCraftInv.invHandler);
+        try {
+            if (getProxy().isActive() && getProxy().getGrid().getMachines(this.getClass()).size() < 2) {
+                if (channel == Util.getItemChannel()) {
+                    return Collections.singletonList(gasDropInv.invHandler);
+                } else if (channel == getGasChannel()) {
+                    return Collections.singletonList(gasCraftInv.invHandler);
+                }
             }
+        } catch (GridAccessException e) {
+            //NO-OP
         }
         return Collections.emptyList();
     }
