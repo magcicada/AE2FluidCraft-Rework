@@ -14,6 +14,7 @@ import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartModel;
+import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.util.AECableType;
 import appeng.api.util.IConfigManager;
@@ -25,6 +26,7 @@ import appeng.helpers.Reflected;
 import appeng.items.parts.PartModels;
 import appeng.parts.PartBasicState;
 import appeng.parts.PartModel;
+import appeng.tile.misc.TileInterface;
 import appeng.util.Platform;
 import appeng.util.SettingsFrom;
 import appeng.util.inv.IAEAppEngInventory;
@@ -32,6 +34,8 @@ import appeng.util.inv.IInventoryDestination;
 import appeng.util.inv.InvOperation;
 import com.glodblock.github.FluidCraft;
 import com.glodblock.github.common.component.DualityDualInterface;
+import com.glodblock.github.common.item.fake.FakeFluids;
+import com.glodblock.github.common.tile.TileDualInterface;
 import com.glodblock.github.interfaces.FCPriorityHost;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.inventory.InventoryHandler;
@@ -45,7 +49,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.IItemHandler;
 
@@ -173,6 +179,16 @@ public class PartDualInterface extends PartBasicState
     }
 
     @Override
+    public void onStackReturnNetwork(IAEFluidStack stack) {
+        this.duality.getItemInterface().onStackReturnedToNetwork(FakeFluids.packFluid2AEDrops(stack));
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEItemStack stack) {
+        this.duality.getItemInterface().onStackReturnedToNetwork(stack);
+    }
+
+    @Override
     public DualityInterface getInterfaceDuality() {
         return duality.getItemInterface();
     }
@@ -281,4 +297,11 @@ public class PartDualInterface extends PartBasicState
         }
     }
 
+    @Override
+    public void onNeighborChanged(IBlockAccess w, BlockPos pos, BlockPos neighbor) {
+        TileEntity tileEntity = getTileEntity();
+        if (tileEntity instanceof TileDualInterface) {
+            ((TileDualInterface) tileEntity).getInterfaceDuality().updateRedstoneState();
+        }
+    }
 }

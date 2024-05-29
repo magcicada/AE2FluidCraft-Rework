@@ -40,11 +40,11 @@ public class GuiItemDualInterface extends GuiInterface {
         ItemStack icon = AEApi.instance().definitions().blocks().fluidIface().maybeStack(1).orElse(ItemStack.EMPTY);
         switchInterface = new GuiTabButton(guiLeft + 133, guiTop, icon, icon.getDisplayName(), itemRender);
         buttonList.add(switchInterface);
-        fluidPacketBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 44, "SEND_MODE", "REAL_FLUID");
+        fluidPacketBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 62, "SEND_MODE", "REAL_FLUID");
         buttonList.add(fluidPacketBtn);
-        splittingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 62, "SPLITTING", "ALLOW");
+        splittingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 80, "SPLITTING", "ALLOW");
         buttonList.add(splittingBtn);
-        blockingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 80, "BLOCK", "ALL");
+        blockingBtn = new GuiFCImgButton(this.guiLeft - 18, this.guiTop + 98, "BLOCK", "ALL");
         buttonList.add(blockingBtn);
         priorityBtn = Ae2ReflectClient.getPriorityButton(this);
     }
