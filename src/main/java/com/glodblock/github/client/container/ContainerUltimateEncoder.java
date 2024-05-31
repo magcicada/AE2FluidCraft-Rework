@@ -224,6 +224,9 @@ public class ContainerUltimateEncoder extends AEBaseContainer implements IOption
     }
 
     public void encode() {
+        if (collectInventory(this.craftingSlots).length == 0 || collectInventory(this.outputSlots).length == 0) {
+            return;
+        }
         if (!checkHasFluidPattern()) {
             ItemStack stack = this.patternSlotOUT.getStack();
             if (stack.isEmpty()) {
