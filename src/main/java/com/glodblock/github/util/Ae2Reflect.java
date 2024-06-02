@@ -2,7 +2,6 @@ package com.glodblock.github.util;
 
 import appeng.api.definitions.IItemDefinition;
 import appeng.api.networking.IGrid;
-import appeng.api.networking.IGridNode;
 import appeng.api.networking.crafting.ICraftingCPU;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.storage.data.IAEItemStack;
@@ -19,7 +18,7 @@ import appeng.recipes.game.DisassembleRecipe;
 import appeng.tile.inventory.AppEngInternalInventory;
 import appeng.util.inv.ItemSlot;
 import appeng.util.inv.filter.IAEItemFilter;
-import com.the9grounds.aeadditions.tileentity.TileEntityGasInterface;
+import com.mekeng.github.common.me.duality.impl.DualityGasInterface;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.world.World;
@@ -52,7 +51,7 @@ public class Ae2Reflect {
     private static final Field fContainerOpenContext_y;
     private static final Field fContainerOpenContext_z;
     private static final Field fCraftingCPURecord_cpu;
-    private static final Field fTileEntityGasInterface_node;
+    private static final Field fDualityGasInterface_gridProxy;
 
     static {
         try {
@@ -78,9 +77,9 @@ public class Ae2Reflect {
             fContainerOpenContext_z = reflectField(ContainerOpenContext.class, "z");
             fCraftingCPURecord_cpu = reflectField(CraftingCPURecord.class, "cpu");
             if (ModAndClassUtil.GAS) {
-                fTileEntityGasInterface_node = reflectField(TileEntityGasInterface.class, "node");
+                fDualityGasInterface_gridProxy = reflectField(DualityGasInterface.class, "gridProxy");
             } else {
-                fTileEntityGasInterface_node = null;
+                fDualityGasInterface_gridProxy = null;
             }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to initialize AE2 reflection hacks!", e);
@@ -260,8 +259,8 @@ public class Ae2Reflect {
         return readField(owner, fCraftingCPURecord_cpu);
     }
 
-    public static IGridNode getGasInterfaceGrid(Object owner) {
-        return readField(owner, fTileEntityGasInterface_node);
+    public static AENetworkProxy getGasInterfaceGrid(Object owner) {
+        return readField(owner, fDualityGasInterface_gridProxy);
     }
 
 }

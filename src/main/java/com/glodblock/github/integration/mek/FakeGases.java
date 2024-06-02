@@ -6,8 +6,8 @@ import com.glodblock.github.common.item.ItemGasDrop;
 import com.glodblock.github.common.item.ItemGasPacket;
 import com.glodblock.github.common.item.fake.FakeItemHandler;
 import com.glodblock.github.common.item.fake.FakeItemRegister;
-import com.the9grounds.aeadditions.api.gas.IAEGasStack;
-import com.the9grounds.aeadditions.integration.mekanism.gas.AEGasStack;
+import com.mekeng.github.common.me.data.IAEGasStack;
+import com.mekeng.github.common.me.data.impl.AEGasStack;
 import mekanism.api.gas.Gas;
 import mekanism.api.gas.GasRegistry;
 import mekanism.api.gas.GasStack;
@@ -60,7 +60,7 @@ public class FakeGases {
                         if (gas == null || gas.getGas() == null) {
                             return null;
                         }
-                        IAEGasStack gasStack = new AEGasStack(gas);
+                        IAEGasStack gasStack = AEGasStack.of(gas);
                         gasStack.setStackSize(stack.getStackSize());
                         return gasStack;
                     }
@@ -140,7 +140,7 @@ public class FakeGases {
                         if (gas == null || gas.getGas() == null) {
                             return null;
                         }
-                        return new AEGasStack(gas);
+                        return AEGasStack.of(gas);
                     }
 
                     @Override

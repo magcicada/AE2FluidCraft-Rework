@@ -1,7 +1,6 @@
 package com.glodblock.github.inventory;
 
 import appeng.api.config.FuzzyMode;
-import appeng.api.networking.IGridNode;
 import appeng.api.parts.IPart;
 import appeng.fluids.helper.DualityFluidInterface;
 import appeng.fluids.helper.IFluidInterfaceHost;
@@ -21,8 +20,7 @@ import com.glodblock.github.common.tile.TileDualInterface;
 import com.glodblock.github.integration.mek.FakeGases;
 import com.glodblock.github.util.Ae2Reflect;
 import com.glodblock.github.util.ModAndClassUtil;
-import com.the9grounds.aeadditions.part.PartECBase;
-import com.the9grounds.aeadditions.tileentity.TileEntityGasInterface;
+import com.mekeng.github.common.me.duality.IGasInterfaceHost;
 import mekanism.api.gas.GasStack;
 import mekanism.api.gas.GasTankInfo;
 import mekanism.api.gas.IGasHandler;
@@ -150,7 +148,7 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
                 GasStack gas = FakeItemRegister.getStack(toBeAdded);
                 if (invGases != null && posInterface != null) {
                     TileEntity te = (TileEntity) facingTE;
-                    IGridNode node = getGasInterfaceGrid(te, facing);
+                    AENetworkProxy node = getGasInterfaceGrid(te, facing);
                     IGasHandler gasHandler = (IGasHandler) invGases;
                     if (!isSameGrid(node)) {
                         if (gas != null && gas.getGas() != null) {
@@ -167,7 +165,7 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
                     for (EnumFacing dir : EnumFacing.values()) {
                         TileEntity te = posInterface.getWorld().getTileEntity(posInterface.getPos().add(dir.getDirectionVec()));
                         if (te != null) {
-                            IGridNode node = getGasInterfaceGrid(te, dir);
+                            AENetworkProxy node = getGasInterfaceGrid(te, dir);
                             if (node != null && isSameGrid(node)) {
                                 continue;
                             }
@@ -187,7 +185,7 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
             if (invGases != null && posInterface != null) {
                 GasStack gas = FakeItemRegister.getStack(toBeAdded);
                 TileEntity te = (TileEntity) facingTE;
-                IGridNode node = getGasInterfaceGrid(te, facing);
+                AENetworkProxy node = getGasInterfaceGrid(te, facing);
                 IGasHandler gasHandler = (IGasHandler) invGases;
                 if (!isSameGrid(node)) {
                     if (gas != null && gas.getGas() != null) {
@@ -269,7 +267,7 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
                 GasStack gas = FakeItemRegister.getStack(toBeSimulated);
                 if (invGases != null && posInterface != null) {
                     TileEntity te = (TileEntity) facingTE;
-                    IGridNode node = getGasInterfaceGrid(te, facing);
+                    AENetworkProxy node = getGasInterfaceGrid(te, facing);
                     IGasHandler gasHandler = (IGasHandler) invGases;
                     if (!isSameGrid(node)) {
                         if (gas != null && gas.getGas() != null) {
@@ -295,7 +293,7 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
                                 if (interFTE != null && isSameGrid(interFTE)) {
                                     continue;
                                 }
-                                IGridNode node = getGasInterfaceGrid(te, dir);
+                                AENetworkProxy node = getGasInterfaceGrid(te, dir);
                                 if (isSameGrid(node)) {
                                     continue;
                                 }
@@ -318,7 +316,7 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
             if (invGases != null && posInterface != null) {
                 GasStack gas = FakeItemRegister.getStack(toBeSimulated);
                 TileEntity te = (TileEntity) facingTE;;
-                IGridNode node = getGasInterfaceGrid(te, facing);
+                AENetworkProxy node = getGasInterfaceGrid(te, facing);
                 IGasHandler gasHandler = (IGasHandler) invGases;
                 if (!isSameGrid(node)) {
                     if (gas != null) {
@@ -419,13 +417,13 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
         return null;
     }
 
-    protected static IGridNode getGasInterfaceGrid(@Nullable TileEntity te, EnumFacing face) {
-        if (te instanceof TileEntityGasInterface) {
-            return Ae2Reflect.getGasInterfaceGrid(te);
+    protected static AENetworkProxy getGasInterfaceGrid(@Nullable TileEntity te, EnumFacing face) {
+        if (te instanceof IGasInterfaceHost) {
+            return Ae2Reflect.getGasInterfaceGrid(((IGasInterfaceHost) te).getDualityGasInterface());
         } else if (te instanceof TileCableBus) {
             IPart part = ((TileCableBus) te).getPart(face.getOpposite());
-            if (part instanceof PartECBase) {
-                return part.getGridNode();
+            if (part instanceof IGasInterfaceHost) {
+                return Ae2Reflect.getGasInterfaceGrid(((IGasInterfaceHost) part).getDualityGasInterface());
             }
         }
         return null;
@@ -463,7 +461,7 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
         return false;
     }
 
-    private boolean isSameGrid(IGridNode target) {
+    private boolean isSameGrid(AENetworkProxy target) {
         if (this.self != null && target != null) {
             try {
                 AENetworkProxy proxy = Ae2Reflect.getInterfaceProxy(this.self);

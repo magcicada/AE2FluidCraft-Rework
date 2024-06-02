@@ -32,7 +32,7 @@ public final class ModAndClassUtil {
             OC = true;
         }
 
-        if (Loader.isModLoaded("mekanism") && Loader.isModLoaded("aeadditions")) {
+        if (Loader.isModLoaded("mekanism") && Loader.isModLoaded("mekeng")) {
             GAS = true;
         }
     }

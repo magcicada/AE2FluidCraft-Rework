@@ -32,8 +32,8 @@ import appeng.tile.grid.AENetworkTile;
 import com.glodblock.github.common.item.fake.FakeItemRegister;
 import com.glodblock.github.integration.mek.FakeGases;
 import com.glodblock.github.util.Util;
-import com.the9grounds.aeadditions.api.gas.IAEGasStack;
-import com.the9grounds.aeadditions.api.gas.IGasStorageChannel;
+import com.mekeng.github.common.me.data.IAEGasStack;
+import com.mekeng.github.common.me.storage.IGasStorageChannel;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import javax.annotation.Nullable;

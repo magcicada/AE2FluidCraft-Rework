@@ -28,9 +28,9 @@ import com.glodblock.github.integration.mek.FakeGases;
 import com.glodblock.github.loader.FCItems;
 import com.glodblock.github.util.ModAndClassUtil;
 import com.glodblock.github.util.Util;
-import com.the9grounds.aeadditions.api.gas.IAEGasStack;
-import com.the9grounds.aeadditions.api.gas.IGasStorageChannel;
-import com.the9grounds.aeadditions.integration.mekanism.gas.AEGasStack;
+import com.mekeng.github.common.me.data.IAEGasStack;
+import com.mekeng.github.common.me.data.impl.AEGasStack;
+import com.mekeng.github.common.me.storage.IGasStorageChannel;
 import mekanism.api.gas.GasStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -118,7 +118,7 @@ public class TileFluidPacketDecoder extends AENetworkTile implements IGridTickab
                 inventory.setStackInSlot(0, ItemStack.EMPTY);
                 return TickRateModulation.SLEEP;
             }
-            IAEStack aeGas = new AEGasStack(gas);
+            IAEStack aeGas = AEGasStack.of(gas);
             IEnergyGrid energyGrid = node.getGrid().getCache(IEnergyGrid.class);
             IMEMonitor gasGrid = node.getGrid().<IStorageGrid>getCache(IStorageGrid.class)
                     .getInventory(AEApi.instance().storage().getStorageChannel(IGasStorageChannel.class));
@@ -127,7 +127,7 @@ public class TileFluidPacketDecoder extends AENetworkTile implements IGridTickab
                 if (remaining.getStackSize() == aeGas.getStackSize()) {
                     return TickRateModulation.SLOWER;
                 }
-                inventory.setStackInSlot(0, FakeGases.packGas2Packet((GasStack) ((IAEGasStack) remaining).getGasStack()));
+                inventory.setStackInSlot(0, FakeGases.packGas2Packet(((IAEGasStack) remaining).getGasStack()));
                 return TickRateModulation.FASTER;
             } else {
                 inventory.setStackInSlot(0, ItemStack.EMPTY);
