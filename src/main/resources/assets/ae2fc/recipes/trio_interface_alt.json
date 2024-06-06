@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mekeng"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "ae2fc:part_trio_interface"
+    }
+  ],
+  "result": {
+    "item": "ae2fc:trio_interface"
+  }
+}

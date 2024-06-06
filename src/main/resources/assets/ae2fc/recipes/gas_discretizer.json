@@ -3,10 +3,6 @@
   "conditions": [
     {
       "type": "forge:mod_loaded",
-      "modid": "mekanism"
-    },
-    {
-      "type": "forge:mod_loaded",
       "modid": "mekeng"
     }
   ],
