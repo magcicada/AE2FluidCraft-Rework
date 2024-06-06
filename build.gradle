@@ -53,9 +53,9 @@ dependencies {
     deobfCompile 'curse.maven:ae2-extended-life-570458:5378163' //pae2
     deobfCompile 'curse.maven:dynamistics-383632:3056455' // dy
     deobfCompile 'curse.maven:baubles-227083:2518667' //baubles
+    deobfCompile "curse.maven:mekanism-ce-399904:4804509" //mek-ce
+    deobfCompile "curse.maven:mekanism-energistics-1027681:5389347" //mekeng
     compileOnly 'curse.maven:opencomputers-223008:4630537' //oc
-    compileOnly "curse.maven:mekanism-ce-399904:4804509" //mek-ce
-    compileOnly "curse.maven:mekanism-energistics-1027681:5389347" //mekeng
 }
 
 minecraft {

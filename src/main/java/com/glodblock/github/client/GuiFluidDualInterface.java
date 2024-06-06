@@ -15,7 +15,7 @@ import java.io.IOException;
 
 public class GuiFluidDualInterface extends GuiFluidInterface {
 
-    private GuiTabButton switchInterface;
+    protected GuiTabButton switchInterface;
     private GuiTabButton priorityBtn;
 
     public GuiFluidDualInterface(final InventoryPlayer ip, final IFluidInterfaceHost te) {
@@ -40,11 +40,6 @@ public class GuiFluidDualInterface extends GuiFluidInterface {
         } else {
             super.actionPerformed(btn);
         }
-    }
-
-    @Override
-    protected boolean drawUpgrades() {
-        return false;
     }
 
 }

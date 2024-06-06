@@ -18,6 +18,7 @@ import appeng.container.implementations.ContainerUpgradeable;
 import appeng.fluids.client.gui.GuiFluidInterface;
 import com.glodblock.github.client.container.ContainerExtendedFluidPatternTerminal;
 import com.google.common.collect.ImmutableMap;
+import com.mekeng.github.client.gui.GuiGasInterface;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -52,6 +53,7 @@ public class Ae2ReflectClient {
     private static final Field[] fGuiCraftAmount_plus = new Field[4];
     private static final Field fGuiCraftConfirm_ccc;
     private static final Field fGuiCraftConfirm_cancel;
+    private static final Field fGuiGasInterface_priority;
 
     static {
         try {
@@ -80,6 +82,11 @@ public class Ae2ReflectClient {
             }
             fGuiCraftConfirm_ccc = Ae2Reflect.reflectField(GuiCraftConfirm.class, "ccc");
             fGuiCraftConfirm_cancel = Ae2Reflect.reflectField(GuiCraftConfirm.class, "cancel");
+            if (ModAndClassUtil.GAS) {
+                fGuiGasInterface_priority = Ae2Reflect.reflectField(GuiGasInterface.class, "priority");
+            } else {
+                fGuiGasInterface_priority = null;
+            }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to initialize AE2 reflection hacks!", e);
         }
@@ -131,6 +138,10 @@ public class Ae2ReflectClient {
 
     public static GuiTabButton getPriorityButton(GuiFluidInterface gui) {
         return Ae2Reflect.readField(gui, fGuiFluidInterface_priority);
+    }
+
+    public static GuiTabButton getPriorityButtonGas(Object gui) {
+        return Ae2Reflect.readField(gui, fGuiGasInterface_priority);
     }
 
     public static void setInterfaceContainer(GuiUpgradeable instance, ContainerUpgradeable container) {

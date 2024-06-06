@@ -51,17 +51,17 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 
-public class TileDualInterface extends AENetworkInvTile
-        implements IGridTickable, IInventoryDestination, IInterfaceHost, FCPriorityHost, IFluidInterfaceHost {
+public class TileDualInterface extends AENetworkInvTile implements IGridTickable, IInventoryDestination, IInterfaceHost, FCPriorityHost, IFluidInterfaceHost {
 
     public TileDualInterface() {
         super();
     }
 
-    private final DualityDualInterface<TileDualInterface> duality = new DualityDualInterface<>(getProxy(), this);
+    @SuppressWarnings("unchecked")
+    protected final DualityDualInterface<TileDualInterface> duality = createDuality();
 
     // Indicates that this interface has no specific direction set
-    private boolean omniDirectional = true;
+    protected boolean omniDirectional = true;
 
     @MENetworkEventSubscribe
     public void stateChange(final MENetworkChannelsChanged c) {
@@ -71,6 +71,11 @@ public class TileDualInterface extends AENetworkInvTile
     @MENetworkEventSubscribe
     public void stateChange(final MENetworkPowerStatusChange c) {
         duality.onPowerStateChange(c);
+    }
+
+    @SuppressWarnings("rawtypes")
+    protected DualityDualInterface createDuality() {
+        return new DualityDualInterface<>(getProxy(), this);
     }
 
     public void setSide(final EnumFacing facing) {

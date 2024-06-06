@@ -29,8 +29,7 @@
       "part": "material.engineering_processor"
     },
     "s": {
-      "item": "aeadditions:part.base",
-      "data": 7
+      "item": "mekeng:gas_storage_bus"
     },
     "m": {
       "item": "appliedenergistics2:condenser"

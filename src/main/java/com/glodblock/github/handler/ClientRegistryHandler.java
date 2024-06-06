@@ -10,6 +10,7 @@ import com.glodblock.github.client.model.LargeItemEncodedPatternModel;
 import com.glodblock.github.common.part.PartDualInterface;
 import com.glodblock.github.common.part.PartExtendedFluidPatternTerminal;
 import com.glodblock.github.common.part.PartFluidPatternTerminal;
+import com.glodblock.github.common.part.PartTrioInterface;
 import com.glodblock.github.interfaces.HasCustomModel;
 import com.glodblock.github.util.ModAndClassUtil;
 import net.minecraft.block.Block;
@@ -31,6 +32,7 @@ public class ClientRegistryHandler extends RegistryHandler {
         ModelLoaderRegistry.registerLoader(new FluidPacketModel.Loader());
         if (ModAndClassUtil.GAS) {
             ModelLoaderRegistry.registerLoader(new GasPacketModel.Loader());
+            AEApi.instance().registries().partModels().registerModels(PartTrioInterface.MODELS);
         }
         for (Pair<String, Block> entry : blocks) {
             registerModel(entry.getLeft(), Item.getItemFromBlock(entry.getRight()));

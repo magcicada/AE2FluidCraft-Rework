@@ -60,6 +60,7 @@ import com.glodblock.github.common.tile.TileFluidPatternEncoder;
 import com.glodblock.github.common.tile.TileIngredientBuffer;
 import com.glodblock.github.common.tile.TileLargeIngredientBuffer;
 import com.glodblock.github.common.tile.TileUltimateEncoder;
+import com.glodblock.github.integration.mek.MekGuiType;
 import com.glodblock.github.interfaces.FCPriorityHost;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -77,6 +78,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Supplier;
 
 public enum GuiType {
 
@@ -224,6 +226,10 @@ public enum GuiType {
         }
     }),
 
+    TRIO_ITEM_INTERFACE(MekGuiType::TRIO_ITEM_GUI),
+    TRIO_FLUID_INTERFACE(MekGuiType::TRIO_FLUID_GUI),
+    TRIO_GAS_INTERFACE(MekGuiType::TRIO_GAS_GUI),
+
     FLUID_PAT_TERM_CRAFTING_STATUS(new ItemOrPartGuiFactory<ITerminalHost>(ITerminalHost.class) {
         @Override
         protected Object createServerGui(EntityPlayer player, ITerminalHost inv) {
@@ -315,10 +321,22 @@ public enum GuiType {
         return ordinal < 0 || ordinal >= VALUES.size() ? null : VALUES.get(ordinal);
     }
 
-    final GuiFactory guiFactory;
+    private GuiFactory guiFactory;
+    private Supplier<GuiFactory> supplier;
 
     GuiType(GuiFactory guiFactory) {
         this.guiFactory = guiFactory;
+    }
+
+    GuiType(Supplier<GuiFactory> lazyFactory) {
+        this.supplier = lazyFactory;
+    }
+
+    public GuiFactory getFactory() {
+        if (this.guiFactory == null) {
+            this.guiFactory = supplier.get();
+        }
+        return this.guiFactory;
     }
 
     public interface GuiFactory {
@@ -332,11 +350,11 @@ public enum GuiType {
 
     }
 
-    private static abstract class TileGuiFactory<T> implements GuiFactory {
+    public static abstract class TileGuiFactory<T> implements GuiFactory {
 
         protected final Class<T> invClass;
 
-        TileGuiFactory(Class<T> invClass) {
+        public TileGuiFactory(Class<T> invClass) {
             this.invClass = invClass;
         }
 
@@ -385,9 +403,9 @@ public enum GuiType {
 
     }
 
-    private static abstract class PartOrTileGuiFactory<T> extends TileGuiFactory<T> {
+    public static abstract class PartOrTileGuiFactory<T> extends TileGuiFactory<T> {
 
-        PartOrTileGuiFactory(Class<T> invClass) {
+        public PartOrTileGuiFactory(Class<T> invClass) {
             super(invClass);
         }
 
@@ -405,9 +423,9 @@ public enum GuiType {
 
     }
 
-    private static abstract class PartGuiFactory<T> extends TileGuiFactory<T> {
+    public static abstract class PartGuiFactory<T> extends TileGuiFactory<T> {
 
-        PartGuiFactory(Class<T> invClass) {
+        public PartGuiFactory(Class<T> invClass) {
             super(invClass);
         }
 
@@ -425,9 +443,9 @@ public enum GuiType {
 
     }
 
-    private static abstract class ItemGuiFactory<T> extends TileGuiFactory<T> {
+    public static abstract class ItemGuiFactory<T> extends TileGuiFactory<T> {
 
-        ItemGuiFactory(Class<T> invClass) {
+        public ItemGuiFactory(Class<T> invClass) {
             super(invClass);
         }
 
@@ -462,9 +480,9 @@ public enum GuiType {
 
     }
 
-    private static abstract class ItemOrPartGuiFactory<T> extends PartGuiFactory<T> {
+    public static abstract class ItemOrPartGuiFactory<T> extends PartGuiFactory<T> {
 
-        ItemOrPartGuiFactory(Class<T> invClass) {
+        public ItemOrPartGuiFactory(Class<T> invClass) {
             super(invClass);
         }
 
@@ -483,9 +501,9 @@ public enum GuiType {
 
     }
 
-    private static abstract class AllGuiFactory<T> extends PartOrTileGuiFactory<T> {
+    public static abstract class AllGuiFactory<T> extends PartOrTileGuiFactory<T> {
 
-        AllGuiFactory(Class<T> invClass) {
+        public AllGuiFactory(Class<T> invClass) {
             super(invClass);
         }
 
@@ -504,7 +522,7 @@ public enum GuiType {
 
     }
 
-    private static Object getItemGuiObject(ItemStack it, EntityPlayer player, World w, int x, int y, int z) {
+    public static Object getItemGuiObject(ItemStack it, EntityPlayer player, World w, int x, int y, int z) {
         if (!it.isEmpty()) {
             if (it.getItem() instanceof IGuiItem) {
                 return ((IGuiItem)it.getItem()).getGuiObject(it, w, new BlockPos(x, y, z));

@@ -2,7 +2,6 @@ package com.glodblock.github.common.block;
 
 import appeng.api.util.IOrientable;
 import appeng.block.AEBaseTileBlock;
-import appeng.tile.misc.TileInterface;
 import appeng.util.Platform;
 import com.glodblock.github.common.tile.TileDualInterface;
 import com.glodblock.github.inventory.GuiType;

@@ -13,6 +13,7 @@ import com.glodblock.github.handler.RegistryHandler;
 import com.glodblock.github.integration.mek.FCGasBlocks;
 import com.glodblock.github.integration.mek.FCGasItems;
 import com.glodblock.github.integration.mek.FakeGases;
+import com.glodblock.github.integration.mek.GasInterfaceUtil;
 import com.glodblock.github.integration.opencomputer.OCInit;
 import com.glodblock.github.integration.pauto.PackagedFluidCrafting;
 import com.glodblock.github.inventory.InventoryHandler;
@@ -68,6 +69,7 @@ public class CommonProxy {
         GameRegistry.registerTileEntity(TileUltimateEncoder.class, FluidCraft.resource(NameConst.BLOCK_ULTIMATE_ENCODER));
         if (ModAndClassUtil.GAS) {
             GameRegistry.registerTileEntity(TileGasDiscretizer.class, FluidCraft.resource(NameConst.BLOCK_GAS_DISCRETIZER));
+            GameRegistry.registerTileEntity(TileTrioInterface.class, FluidCraft.resource(NameConst.BLOCK_TRIO_INTERFACE));
         }
         (new ChannelLoader()).run();
         if (ModAndClassUtil.AUTO_P) {
@@ -108,6 +110,9 @@ public class CommonProxy {
         Upgrades.CRAFTING.registerItem(new ItemStack(FCItems.PART_DUAL_INTERFACE), 2);
         Upgrades.CRAFTING.registerItem(AEApi.instance().definitions().parts().fluidExportBus(), 1);
         Upgrades.MAGNET.registerItem(new ItemStack(FCItems.WIRELESS_FLUID_PATTERN_TERMINAL), 1);
+        if (ModAndClassUtil.GAS) {
+            GasInterfaceUtil.addUpgrade();
+        }
         NetworkRegistry.INSTANCE.registerGuiHandler(FluidCraft.INSTANCE, new InventoryHandler());
     }
 

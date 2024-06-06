@@ -16,6 +16,7 @@ public final class NameConst {
     public static final String BLOCK_FLUID_LEVEL_MAINTAINER = "fluid_level_maintainer";
     public static final String BLOCK_FLUID_ASSEMBLER = "fluid_assembler";
     public static final String BLOCK_ULTIMATE_ENCODER = "ultimate_encoder";
+    public static final String BLOCK_TRIO_INTERFACE = "trio_interface";
 
     public static final String ITEM_FLUID_DROP = "fluid_drop";
     public static final String ITEM_FLUID_PACKET = "fluid_packet";
@@ -28,6 +29,7 @@ public final class NameConst {
     public static final String ITEM_PART_FLUID_PATTERN_TERMINAL = "part_fluid_pattern_terminal";
     public static final String ITEM_PART_EXTENDED_FLUID_PATTERN_TERMINAL = "part_fluid_pattern_ex_terminal";
     public static final String ITEM_WIRELESS_FLUID_PATTERN_TERMINAL = "wireless_fluid_pattern_terminal";
+    public static final String ITEM_PART_TRIO_INTERFACE = "part_trio_interface";
 
     public static final String TT_KEY = FluidCraft.MODID + ".tooltip.";
     public static final String TT_FLUID_PACKET = TT_KEY + "fluid_packet";

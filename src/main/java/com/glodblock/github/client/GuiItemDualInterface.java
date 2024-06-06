@@ -21,7 +21,7 @@ import java.io.IOException;
 public class GuiItemDualInterface extends GuiInterface {
 
     private final ContainerItemDualInterface container;
-    private GuiTabButton switchInterface;
+    protected GuiTabButton switchInterface;
     private GuiTabButton priorityBtn;
     private GuiFCImgButton fluidPacketBtn;
     private GuiFCImgButton splittingBtn;
@@ -61,7 +61,7 @@ public class GuiItemDualInterface extends GuiInterface {
             FluidCraft.proxy.netHandler.sendToServer(new CPacketFluidPatternTermBtns("DualInterface.AllowSplitting", this.splittingBtn.getCurrentValue().equals("ALLOW") ? "0" : "1"));
         } else if (btn == blockingBtn) {
             FluidCraft.proxy.netHandler.sendToServer(new CPacketFluidPatternTermBtns("DualInterface.ExtendedBlockMode", this.blockingBtn.getCurrentValue().equals("ALL") ? "1" : this.blockingBtn.getCurrentValue().equals("ITEM") ? "2" : "0"));
-        }  else {
+        } else {
             super.actionPerformed(btn);
         }
     }

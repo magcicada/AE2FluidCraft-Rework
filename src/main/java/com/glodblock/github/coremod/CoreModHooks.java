@@ -26,7 +26,6 @@ import appeng.fluids.tile.TileFluidInterface;
 import appeng.helpers.DualityInterface;
 import appeng.helpers.IInterfaceHost;
 import appeng.helpers.WirelessTerminalGuiObject;
-import appeng.me.MachineSet;
 import appeng.me.cluster.implementations.CraftingCPUCluster;
 import appeng.parts.misc.PartInterface;
 import appeng.tile.misc.TileInterface;
@@ -47,6 +46,7 @@ import com.glodblock.github.common.tile.TileDualInterface;
 import com.glodblock.github.handler.FluidConvertingItemHandler;
 import com.glodblock.github.integration.mek.FCGasItems;
 import com.glodblock.github.integration.mek.FakeGases;
+import com.glodblock.github.integration.mek.GasInterfaceUtil;
 import com.glodblock.github.inventory.BlockingFluidInventoryAdaptor;
 import com.glodblock.github.inventory.FluidConvertingInventoryAdaptor;
 import com.glodblock.github.inventory.FluidConvertingInventoryCrafting;
@@ -57,7 +57,6 @@ import com.glodblock.github.util.Ae2Reflect;
 import com.glodblock.github.util.ModAndClassUtil;
 import com.glodblock.github.util.SetBackedMachineSet;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import com.mekeng.github.common.me.data.IAEGasStack;
 import com.mekeng.github.common.me.storage.IGasStorageChannel;
 import mekanism.api.gas.GasStack;
@@ -76,9 +75,7 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 @SuppressWarnings("unused")
 public class CoreModHooks {
@@ -181,12 +178,23 @@ public class CoreModHooks {
 
     public static IMachineSet getMachines(IGrid grid, Class<? extends IGridHost> c) {
         if (c == TileInterface.class || c == TileFluidInterface.class) {
-            return unionMachineSets(grid.getMachines(c), grid.getMachines(TileDualInterface.class));
+            if (ModAndClassUtil.GAS) {
+                return unionMachineSets(grid.getMachines(c), grid.getMachines(TileDualInterface.class), GasInterfaceUtil.getGasInterface(grid));
+            } else {
+                return unionMachineSets(grid.getMachines(c), grid.getMachines(TileDualInterface.class));
+            }
         } else if (c == PartInterface.class || c == PartFluidInterface.class) {
-            return unionMachineSets(grid.getMachines(c), grid.getMachines(PartDualInterface.class));
-        } else {
-            return grid.getMachines(c);
+            if (ModAndClassUtil.GAS) {
+                return unionMachineSets(grid.getMachines(c), grid.getMachines(PartDualInterface.class), GasInterfaceUtil.getGasPartInterface(grid));
+            } else {
+                return unionMachineSets(grid.getMachines(c), grid.getMachines(PartDualInterface.class));
+            }
+        } else if (ModAndClassUtil.GAS && GasInterfaceUtil.isGasInterfaceTile(c)) {
+            return unionMachineSets(grid.getMachines(c), GasInterfaceUtil.getGasInterface(grid));
+        } else if (ModAndClassUtil.GAS && GasInterfaceUtil.isGasInterfacePart(c)) {
+            return unionMachineSets(grid.getMachines(c), GasInterfaceUtil.getGasPartInterface(grid));
         }
+        return grid.getMachines(c);
     }
 
     public static Object wrapFluidPacket(ItemStack stack) {
@@ -199,19 +207,8 @@ public class CoreModHooks {
         return stack;
     }
 
-    private static IMachineSet unionMachineSets(IMachineSet a, IMachineSet b) {
-        if (a.isEmpty()) {
-            return b;
-        } else if (b.isEmpty()) {
-            return a;
-        } else if (a instanceof MachineSet && b instanceof MachineSet) {
-            return new SetBackedMachineSet(TileInterface.class, Sets.union((MachineSet)a, (MachineSet)b));
-        } else {
-            Set<IGridNode> union = new HashSet<>();
-            a.forEach(union::add);
-            b.forEach(union::add);
-            return new SetBackedMachineSet(TileInterface.class, union);
-        }
+    private static IMachineSet unionMachineSets(IMachineSet... sets) {
+        return SetBackedMachineSet.combine(TileInterface.class, sets);
     }
 
     public static ItemStack displayFluid(ItemStack drop) {
