@@ -125,11 +125,11 @@ public class CoreModHooks {
 
     public static ItemStack removeFluidPackets(InventoryCrafting inv, int index) {
         ItemStack stack = inv.getStackInSlot(index);
-        if (stack != ItemStack.EMPTY && stack.getItem() == FCItems.FLUID_PACKET) {
+        if (!stack.isEmpty() && stack.getItem() == FCItems.FLUID_PACKET) {
             FluidStack fluid = FakeItemRegister.getStack(stack);
             return FakeFluids.packFluid2Drops(fluid);
         }
-        if (ModAndClassUtil.GAS && stack != ItemStack.EMPTY && stack.getItem() == FCGasItems.GAS_PACKET) {
+        if (ModAndClassUtil.GAS && !stack.isEmpty() && stack.getItem() == FCGasItems.GAS_PACKET) {
             GasStack gas = FakeItemRegister.getStack(stack);
             return FakeGases.packGas2Drops(gas);
         }
@@ -141,8 +141,7 @@ public class CoreModHooks {
     public static long getCraftingByteCost(IAEItemStack stack) {
         if (stack.getItem() == FCItems.FLUID_DROP) {
             return (long) Math.ceil(stack.getStackSize() / 1000D);
-        }
-        if (ModAndClassUtil.GAS && stack.getItem() == FCGasItems.GAS_DROP) {
+        } else if (ModAndClassUtil.GAS && stack.getItem() == FCGasItems.GAS_DROP) {
             return (long) Math.ceil(stack.getStackSize() / 4000D);
         }
         return stack.getStackSize();
@@ -151,8 +150,7 @@ public class CoreModHooks {
     public static long getCraftingByteCost(long originBytes, long missingBytes, IAEItemStack stack) {
         if (stack != null && stack.getItem() == FCItems.FLUID_DROP) {
             return (long) Math.ceil(missingBytes / 1000D) + originBytes;
-        }
-        if (ModAndClassUtil.GAS && stack != null && stack.getItem() == FCGasItems.GAS_DROP) {
+        } else if (ModAndClassUtil.GAS && stack != null && stack.getItem() == FCGasItems.GAS_DROP) {
             return (long) Math.ceil(missingBytes / 4000D) + originBytes;
         }
         return missingBytes + originBytes;
@@ -251,8 +249,7 @@ public class CoreModHooks {
         if (aeStack.getDefinition() != null && !aeStack.getDefinition().isEmpty()) {
             if (aeStack.getDefinition().getItem() == FCItems.FLUID_DROP) {
                 return (long) Math.max(aeStack.getStackSize() / 1000D, 1);
-            }
-            if (ModAndClassUtil.GAS && aeStack.getDefinition().getItem() == FCGasItems.GAS_DROP) {
+            } else if (ModAndClassUtil.GAS && aeStack.getDefinition().getItem() == FCGasItems.GAS_DROP) {
                 return (long) Math.max(aeStack.getStackSize() / 4000D, 1);
             }
         }
