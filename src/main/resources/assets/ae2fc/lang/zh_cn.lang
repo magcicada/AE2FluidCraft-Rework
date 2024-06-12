@@ -1,6 +1,10 @@
 itemGroup.ae2fc=AE2流体合成套件
 
+key.ae2fc.category=AE2流体合成套件
+key.ae2fc.open_wireless_fluid_pattern_terminal.desc=打开无线流体样板终端
+
 tile.ae2fc:fluid_discretizer.name=ME流体离散器
+tile.ae2fc:gas_discretizer.name=ME气体离散器
 tile.ae2fc:fluid_pattern_encoder.name=流体适配型样板编码台
 tile.ae2fc:fluid_packet_decoder.name=ME流体封包解码器
 tile.ae2fc:ingredient_buffer.name=原材料缓存仓
@@ -11,15 +15,20 @@ tile.ae2fc:part_dual_interface.name=ME二合一接口
 tile.ae2fc:fluid_level_maintainer.name=ME流体缓存指令器
 tile.ae2fc:fluid_assembler.name=ME流体装配室
 tile.ae2fc:ultimate_encoder.name=ME终极编码台
+tile.ae2fc:trio_interface.name=ME三合一接口
 
 item.ae2fc:fluid_drop.name=%s液滴
+item.ae2fc:gas_drop.name=%s气滴
 item.ae2fc:fluid_packet.name=流体封包
+item.ae2fc:gas_packet.name=气体封包
 item.ae2fc:dense_encoded_pattern.name=编码样板
 item.ae2fc:dense_craft_encoded_pattern.name=编码样板
 item.ae2fc:large_item_encoded_pattern.name=编码样板
 item.ae2fc:part_dual_interface.name=ME二合一接口
 item.ae2fc:part_fluid_pattern_terminal.name=ME流体样板终端
 item.ae2fc:part_fluid_pattern_ex_terminal.name=ME增广流体样板终端
+item.ae2fc:wireless_fluid_pattern_terminal.name=无线流体样板终端
+item.ae2fc:part_trio_interface.name=ME三合一接口
 
 ae2fc.gui.fluid_pattern_encoder=流体样板编码台
 ae2fc.gui.fluid_packet_decoder=ME流体封包解码器
@@ -36,6 +45,7 @@ ae2fc.misc.threshold=阈值
 ae2fc.misc.request=批量制作数量
 
 ae2fc.tooltip.fluid_packet=使用ME流体封包解码器\n来将其转换回流体形式。
+ae2fc.tooltip.gas_packet=使用ME流体封包解码器\n来将其转换回气体形式。
 ae2fc.tooltip.invalid_fluid=流体无效！
 ae2fc.tooltip.processing_recipe_only=不为处理配方！
 ae2fc.tooltip.crafting_recipe_only=不为合成配方！
