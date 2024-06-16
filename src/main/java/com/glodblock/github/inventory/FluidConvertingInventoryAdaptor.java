@@ -355,6 +355,9 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
 
     @Override
     public boolean containsItems() {
+        if (invItems == null && invFluids == null && invGases == null) {
+            return true;
+        }
         int blockMode = 0;
         if (this.self != null) {
             blockMode = Ae2Reflect.getExtendedBlockMode(this.self);

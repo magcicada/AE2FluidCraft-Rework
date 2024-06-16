@@ -89,6 +89,10 @@ public class BlockingFluidInventoryAdaptor extends BlockingInventoryAdaptor {
         boolean checkFluid = true;
         boolean checkItem = true;
 
+        if (invItems == null && invFluids == null && invGases == null) {
+            return true;
+        }
+
         if (dualInterface != null) {
             int mode = Ae2Reflect.getExtendedBlockMode(dualInterface);
             checkFluid = mode != 1;
