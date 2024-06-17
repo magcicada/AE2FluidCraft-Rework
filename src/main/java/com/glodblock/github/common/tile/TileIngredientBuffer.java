@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -68,6 +69,11 @@ public class TileIngredientBuffer extends AEBaseInvTile implements IAEFluidInven
     public void onFluidInventoryChanged(IAEFluidTank inv, int slot) {
         saveChanges();
         markForUpdate();
+    }
+
+    @Override
+    public void onFluidInventoryChanged(IAEFluidTank inv, int slot, InvOperation operation, FluidStack added, FluidStack removed) {
+        this.onFluidInventoryChanged(inv, slot);
     }
 
     @Override
