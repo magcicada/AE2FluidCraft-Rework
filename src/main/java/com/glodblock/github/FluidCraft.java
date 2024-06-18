@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 public class FluidCraft {
 
     public static final String MODID = "ae2fc";
-    public static final String VERSION = "2.6.1-r";
+    public static final String VERSION = "2.6.2-r";
     public static final boolean beta = false;
 
     @Mod.Instance(MODID)
