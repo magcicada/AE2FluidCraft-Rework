@@ -1,7 +1,11 @@
 package com.glodblock.github.inventory;
 
+import appeng.api.AEApi;
 import appeng.api.config.FuzzyMode;
 import appeng.api.parts.IPart;
+import appeng.api.storage.IMEMonitor;
+import appeng.api.storage.data.IAEFluidStack;
+import appeng.api.storage.data.IAEItemStack;
 import appeng.fluids.helper.DualityFluidInterface;
 import appeng.fluids.helper.IFluidInterfaceHost;
 import appeng.helpers.DualityInterface;
@@ -20,7 +24,11 @@ import com.glodblock.github.common.tile.TileDualInterface;
 import com.glodblock.github.integration.mek.FakeGases;
 import com.glodblock.github.util.Ae2Reflect;
 import com.glodblock.github.util.ModAndClassUtil;
+import com.glodblock.github.util.Util;
+import com.mekeng.github.common.me.data.IAEGasStack;
 import com.mekeng.github.common.me.duality.IGasInterfaceHost;
+import com.mekeng.github.common.me.duality.impl.DualityGasInterface;
+import com.mekeng.github.common.me.storage.IGasStorageChannel;
 import mekanism.api.gas.GasStack;
 import mekanism.api.gas.GasTankInfo;
 import mekanism.api.gas.IGasHandler;
@@ -364,7 +372,15 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
         }
         boolean checkFluid = blockMode != 1;
         boolean checkItem = blockMode != 2;
-        if (invFluids != null && checkFluid) {
+
+        IFluidInterfaceHost fluidHost = getFluidInterfaceTE((TileEntity) facingTE, facing);
+        if (fluidHost != null && !isSameGrid(fluidHost) && checkFluid) {
+            DualityFluidInterface inter = fluidHost.getDualityFluidInterface();
+            IMEMonitor<IAEFluidStack> monitor = inter.getInventory(Util.getFluidChannel());
+            if (monitor != null && !monitor.getStorageList().isEmpty()) {
+                return true;
+            }
+        } else if (invFluids != null && checkFluid) {
             for (IFluidTankProperties tank : invFluids.getTankProperties()) {
                 FluidStack fluid = tank.getContents();
                 if (fluid != null && fluid.amount > 0) {
@@ -372,17 +388,33 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
                 }
             }
         }
+
         /*yeah, gas is fluid*/
-        if (invGases != null && checkFluid) {
-            IGasHandler gasHandler = (IGasHandler) invGases;
-            for (GasTankInfo tank : gasHandler.getTankInfo()) {
-                GasStack gas = tank.getGas();
-                if (gas != null && gas.getGas() != null && gas.amount > 0) {
+        if (ModAndClassUtil.GAS) {
+            Object gasHost = getGasInterfaceTE((TileEntity) facingTE, facing);
+            if (gasHost != null && !isSameGrid(((IGasInterfaceHost) gasHost).getProxy()) && checkFluid) {
+                DualityGasInterface inter = ((IGasInterfaceHost) gasHost).getDualityGasInterface();
+                IMEMonitor<IAEGasStack> monitor = inter.getInventory(AEApi.instance().storage().getStorageChannel(IGasStorageChannel.class));
+                if (monitor != null && !monitor.getStorageList().isEmpty()) {
                     return true;
+                }
+            } else if (invGases != null && checkFluid) {
+                IGasHandler gasHandler = (IGasHandler) invGases;
+                for (GasTankInfo tank : gasHandler.getTankInfo()) {
+                    GasStack gas = tank.getGas();
+                    if (gas != null && gas.getGas() != null && gas.amount > 0) {
+                        return true;
+                    }
                 }
             }
         }
-        if (invItems != null && checkItem) {
+
+        IInterfaceHost itemHost = getInterfaceTE((TileEntity) facingTE, facing);
+        if (itemHost != null && !isSameGrid(itemHost) && checkItem) {
+            DualityInterface inter = itemHost.getInterfaceDuality();
+            IMEMonitor<IAEItemStack> monitor = inter.getInventory(Util.getItemChannel());
+            return monitor != null && !monitor.getStorageList().isEmpty();
+        } else if (invItems != null && checkItem) {
             return invItems.containsItems();
         }
         return false;
@@ -415,6 +447,19 @@ public class FluidConvertingInventoryAdaptor extends InventoryAdaptor {
             IPart part = ((TileCableBus) te).getPart(face.getOpposite());
             if (part instanceof IFluidInterfaceHost) {
                 return (IFluidInterfaceHost) part;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    protected static Object getGasInterfaceTE(TileEntity te, EnumFacing face) {
+        if (te instanceof IGasInterfaceHost) {
+            return te;
+        } else if (te instanceof TileCableBus) {
+            IPart part = ((TileCableBus) te).getPart(face.getOpposite());
+            if (part instanceof IGasInterfaceHost) {
+                return part;
             }
         }
         return null;
