@@ -1,6 +1,5 @@
 package com.glodblock.github.integration.jei;
 
-import com.glodblock.github.common.item.ItemFluidPacket;
 import com.glodblock.github.common.item.fake.FakeFluids;
 import com.glodblock.github.integration.gregtech.GregUtil;
 import com.glodblock.github.integration.mek.FakeGases;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 public class RecipeTransferBuilder {
 
     private static ExtraExtractors extractor = null;
+    private static ExtraGasExtractors extractorGas = null;
     private static final int MAX_ITEMS = 16;
     private static Field fRecipeLayout_recipeWrapper;
 
@@ -66,8 +66,16 @@ public class RecipeTransferBuilder {
         RecipeTransferBuilder.extractor = extractor;
     }
 
+    public static void setGasExtractor(ExtraGasExtractors extractor) {
+        RecipeTransferBuilder.extractorGas = extractor;
+    }
+
     public static ExtraExtractors getExtractor() {
         return extractor;
+    }
+
+    public static ExtraGasExtractors getGasExtractor() {
+        return extractorGas;
     }
 
     private void split() {
@@ -117,6 +125,17 @@ public class RecipeTransferBuilder {
                             this.fluidIn.add(ing.getIngredient());
                         } else {
                             this.fluidOut.add(ing.getIngredient());
+                        }
+                    }
+            );
+        }
+        if (extractorGas != null) {
+            extractorGas.extractGases(this.recipe).forEach(
+                    ing -> {
+                        if (ing.isInput()) {
+                            this.gasIn.add(ing.getIngredient());
+                        } else {
+                            this.gasOut.add(ing.getIngredient());
                         }
                     }
             );

@@ -1,12 +1,18 @@
 package com.glodblock.github.integration.pauto;
 
 import com.glodblock.github.FluidCraft;
-import com.glodblock.github.common.item.ItemFluidPacket;
 import com.glodblock.github.common.item.fake.FakeFluids;
 import com.glodblock.github.integration.jei.RecipeTransferBuilder;
 import com.glodblock.github.integration.jei.WrappedIngredient;
+import com.glodblock.github.integration.mek.FakeGases;
 import com.glodblock.github.loader.FCBlocks;
-import it.unimi.dsi.fastutil.ints.*;
+import com.glodblock.github.util.ModAndClassUtil;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
+import mekanism.api.gas.GasStack;
 import mezz.jei.api.gui.IGuiIngredient;
 import mezz.jei.api.gui.IRecipeLayout;
 import net.minecraft.item.ItemStack;
@@ -142,6 +148,21 @@ public class RecipeTypeFluidProcessing implements IRecipeType {
             } else {
                 if (ndxOutput < NUM_SLOTS_OUT) {
                     tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, FakeFluids.packFluid2Packet(ing.getIngredient()));
+                }
+            }
+        }
+        if (ModAndClassUtil.GAS) {
+            Iterator<WrappedIngredient<GasStack>> iterGas = RecipeTransferBuilder.getGasExtractor().extractGases(recipeLayout).iterator();
+            while (iterGas.hasNext()) {
+                WrappedIngredient<GasStack> ing = iterGas.next();
+                if (ing.isInput()) {
+                    if (ndxCrafting < NUM_SLOTS_CRAFT) {
+                        tfrs.put(ndxCrafting++, FakeGases.packGas2Packet(ing.getIngredient()));
+                    }
+                } else {
+                    if (ndxOutput < NUM_SLOTS_OUT) {
+                        tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, FakeGases.packGas2Packet(ing.getIngredient()));
+                    }
                 }
             }
         }

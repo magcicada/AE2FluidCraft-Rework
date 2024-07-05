@@ -40,6 +40,9 @@ public class FCJeiPlugin implements IModPlugin {
     public void register(@Nonnull IModRegistry registry) {
         IngredientExtractor<FluidStack> extModMach = Loader.isModLoaded("modularmachinery")
                 ? new ModMachHybridFluidStackExtractor(registry) : null;
+        if (ModAndClassUtil.GAS && extModMach != null) {
+            RecipeTransferBuilder.setGasExtractor(new ExtraGasExtractors(new ModMachHybridGasStackExtractor(registry)));
+        }
         RecipeTransferBuilder.setExtractor(new ExtraExtractors(extModMach));
         registry.getRecipeTransferRegistry().addRecipeTransferHandler(
                 new FluidPatternEncoderRecipeTransferHandler(), Constants.UNIVERSAL_RECIPE_TRANSFER_UID);
