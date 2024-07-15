@@ -4,7 +4,6 @@ import com.glodblock.github.integration.dynamistics.FluidCraftPatternCategory;
 import com.glodblock.github.integration.dynamistics.FluidCraftPatternPlugin;
 import com.glodblock.github.integration.dynamistics.FluidPatternCategory;
 import com.glodblock.github.integration.dynamistics.FluidPatternPlugin;
-import com.glodblock.github.integration.jei.interfaces.IngredientExtractor;
 import com.glodblock.github.loader.FCBlocks;
 import com.glodblock.github.util.ModAndClassUtil;
 import eutros.dynamistics.helper.ItemHelper;
@@ -16,8 +15,6 @@ import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import mezz.jei.config.Constants;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nonnull;
 
@@ -38,12 +35,6 @@ public class FCJeiPlugin implements IModPlugin {
 
     @Override
     public void register(@Nonnull IModRegistry registry) {
-        IngredientExtractor<FluidStack> extModMach = Loader.isModLoaded("modularmachinery")
-                ? new ModMachHybridFluidStackExtractor(registry) : null;
-        if (ModAndClassUtil.GAS && extModMach != null) {
-            RecipeTransferBuilder.setGasExtractor(new ExtraGasExtractors(new ModMachHybridGasStackExtractor(registry)));
-        }
-        RecipeTransferBuilder.setExtractor(new ExtraExtractors(extModMach));
         registry.getRecipeTransferRegistry().addRecipeTransferHandler(
                 new FluidPatternEncoderRecipeTransferHandler(), Constants.UNIVERSAL_RECIPE_TRANSFER_UID);
         registry.getRecipeTransferRegistry().addRecipeTransferHandler(

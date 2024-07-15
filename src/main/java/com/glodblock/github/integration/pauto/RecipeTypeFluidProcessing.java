@@ -2,17 +2,12 @@ package com.glodblock.github.integration.pauto;
 
 import com.glodblock.github.FluidCraft;
 import com.glodblock.github.common.item.fake.FakeFluids;
-import com.glodblock.github.integration.jei.RecipeTransferBuilder;
-import com.glodblock.github.integration.jei.WrappedIngredient;
-import com.glodblock.github.integration.mek.FakeGases;
 import com.glodblock.github.loader.FCBlocks;
-import com.glodblock.github.util.ModAndClassUtil;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
-import mekanism.api.gas.GasStack;
 import mezz.jei.api.gui.IGuiIngredient;
 import mezz.jei.api.gui.IRecipeLayout;
 import net.minecraft.item.ItemStack;
@@ -27,7 +22,6 @@ import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
 
 import java.awt.*;
-import java.util.Iterator;
 import java.util.List;
 
 public class RecipeTypeFluidProcessing implements IRecipeType {
@@ -135,34 +129,6 @@ public class RecipeTypeFluidProcessing implements IRecipeType {
             } else {
                 if (ndxOutput < NUM_SLOTS_OUT) {
                     tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, FakeFluids.packFluid2Packet(ing.getDisplayedIngredient()));
-                }
-            }
-        }
-        Iterator<WrappedIngredient<FluidStack>> iter = RecipeTransferBuilder.getExtractor().extractFluids(recipeLayout).iterator();
-        while (iter.hasNext()) {
-            WrappedIngredient<FluidStack> ing = iter.next();
-            if (ing.isInput()) {
-                if (ndxCrafting < NUM_SLOTS_CRAFT) {
-                    tfrs.put(ndxCrafting++, FakeFluids.packFluid2Packet(ing.getIngredient()));
-                }
-            } else {
-                if (ndxOutput < NUM_SLOTS_OUT) {
-                    tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, FakeFluids.packFluid2Packet(ing.getIngredient()));
-                }
-            }
-        }
-        if (ModAndClassUtil.GAS) {
-            Iterator<WrappedIngredient<GasStack>> iterGas = RecipeTransferBuilder.getGasExtractor().extractGases(recipeLayout).iterator();
-            while (iterGas.hasNext()) {
-                WrappedIngredient<GasStack> ing = iterGas.next();
-                if (ing.isInput()) {
-                    if (ndxCrafting < NUM_SLOTS_CRAFT) {
-                        tfrs.put(ndxCrafting++, FakeGases.packGas2Packet(ing.getIngredient()));
-                    }
-                } else {
-                    if (ndxOutput < NUM_SLOTS_OUT) {
-                        tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, FakeGases.packGas2Packet(ing.getIngredient()));
-                    }
                 }
             }
         }

@@ -47,7 +47,6 @@ repositories {
 dependencies {
     deobfCompile 'curse.maven:jei-238222:4538010' //jei
     deobfCompile 'curse.maven:packagedauto-308380:2977147' // 1.0.3.14
-    deobfCompile 'curse.maven:modular-machinery-270790:2761302' // 1.11.1
     deobfCompile 'curse.maven:codechicken-lib-1-8-242818:2779848' //ccl
     deobfCompile 'curse.maven:gregtech-ce-unofficial-557242:5121638' // gt
     deobfCompile 'curse.maven:ae2-extended-life-570458:5378163' //pae2
