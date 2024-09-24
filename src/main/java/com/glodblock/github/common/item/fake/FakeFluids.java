@@ -51,7 +51,15 @@ public final class FakeFluids {
 
                     @Override
                     public IAEFluidStack getAEStack(ItemStack stack) {
-                        return getAEStack(AEItemStack.fromItemStack(stack));
+                        if (stack.isEmpty()) {
+                            return null;
+                        }
+                        IAEFluidStack fluidStack = AEFluidStack.fromFluidStack(getStack(stack));
+                        if (fluidStack == null) {
+                            return null;
+                        }
+                        fluidStack.setStackSize(stack.getCount());
+                        return fluidStack;
                     }
 
                     @Override
@@ -92,7 +100,7 @@ public final class FakeFluids {
                         if (fluid == null || fluid.amount <= 0) {
                             return null;
                         }
-                        IAEItemStack stack = AEItemStack.fromItemStack(packStack(fluid));
+                        IAEItemStack stack = DropLookup.lookup(fluid, f -> AEItemStack.fromItemStack(packStack(f)));
                         if (stack == null) {
                             return null;
                         }
@@ -105,7 +113,7 @@ public final class FakeFluids {
                         if (fluid == null || fluid.getStackSize() <= 0) {
                             return null;
                         }
-                        IAEItemStack stack = AEItemStack.fromItemStack(packStack(fluid.getFluidStack()));
+                        IAEItemStack stack = DropLookup.lookup(fluid.getFluidStack(), f -> AEItemStack.fromItemStack(packStack(f)));
                         if (stack == null) {
                             return null;
                         }
