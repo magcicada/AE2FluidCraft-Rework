@@ -1,0 +1,70 @@
+[
+  {
+    "name": "appliedenergistics2:dual_interface",
+    "ingredient": [
+      {
+        "item": "ae2fc:dual_interface"
+      },
+      {
+        "item": "ae2fc:part_dual_interface"
+      }
+    ]
+  },
+  {
+    "name": "appliedenergistics2:interface",
+    "conditions": [
+      {
+        "type": "appliedenergistics2:features",
+        "features": [
+          "interface"
+        ]
+      }
+    ],
+    "ingredient": [
+      {
+        "item": "appliedenergistics2:interface"
+      },
+      {
+        "type": "appliedenergistics2:part",
+        "part": "part.interface"
+      }
+    ]
+  },
+  {
+    "name": "appliedenergistics2:fluid_interface",
+    "conditions": [
+      {
+        "type": "appliedenergistics2:features",
+        "features": [
+          "fluid_interface"
+        ]
+      }
+    ],
+    "ingredient": [
+      {
+        "item": "appliedenergistics2:fluid_interface"
+      },
+      {
+        "type": "appliedenergistics2:part",
+        "part": "part.fluid_interface"
+      }
+    ]
+  },
+  {
+    "name": "appliedenergistics2:gas_interface",
+    "conditions": [
+      {
+        "type": "forge:mod_loaded",
+        "modid": "mekeng"
+      }
+    ],
+    "ingredient": [
+      {
+        "item": "mekeng:gas_interface"
+      },
+      {
+        "item": "mekeng:gas_interface_part"
+      }
+    ]
+  }
+]

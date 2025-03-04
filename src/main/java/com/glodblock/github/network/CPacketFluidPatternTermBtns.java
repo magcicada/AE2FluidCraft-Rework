@@ -3,6 +3,8 @@ package com.glodblock.github.network;
 import com.glodblock.github.client.container.ContainerExtendedFluidPatternTerminal;
 import com.glodblock.github.client.container.ContainerFluidPatternTerminal;
 import com.glodblock.github.client.container.ContainerItemDualInterface;
+import com.glodblock.github.client.container.ContainerUltimateEncoder;
+import com.glodblock.github.client.container.ContainerWirelessFluidPatternTerminal;
 import com.glodblock.github.client.container.ContainerWrapInterface;
 import com.glodblock.github.common.part.PartExtendedFluidPatternTerminal;
 import com.glodblock.github.common.part.PartFluidPatternTerminal;
@@ -74,6 +76,22 @@ public class CPacketFluidPatternTermBtns implements IMessage {
                         case "PatternTerminal.Fluid":
                             ((PartFluidPatternTerminal) Ae2Reflect.getPart(cpt)).setFluidPlaceMode(Value.equals("1"));
                             break;
+                        case "PatternTerminal.Craft":
+                            cpt.encodeFluidCraftPattern();
+                            break;
+                    }
+                } else if (c instanceof ContainerWirelessFluidPatternTerminal) {
+                    final ContainerWirelessFluidPatternTerminal cpt = (ContainerWirelessFluidPatternTerminal) c;
+                    switch (Name) {
+                        case "PatternTerminal.Combine":
+                            cpt.setCombineMode(Value.equals("1"));
+                            break;
+                        case "PatternTerminal.Fluid":
+                            cpt.setFluidPlaceMode(Value.equals("1"));
+                            break;
+                        case "PatternTerminal.Craft":
+                            cpt.encodeFluidCraftPattern();
+                            break;
                     }
                 } else if (c instanceof ContainerExtendedFluidPatternTerminal) {
                     final ContainerExtendedFluidPatternTerminal cpt = (ContainerExtendedFluidPatternTerminal) c;
@@ -91,12 +109,61 @@ public class CPacketFluidPatternTermBtns implements IMessage {
                         case "DualInterface.FluidPacket":
                             cdi.setFluidPacketInTile(Value.equals("1"));
                             break;
+                        case "DualInterface.AllowSplitting":
+                            cdi.setAllowSplittingInTile(Value.equals("1"));
+                            break;
+                        case "DualInterface.ExtendedBlockMode":
+                            cdi.setExtendedBlockMode(Integer.parseInt(Value));
+                            break;
                     }
                 } else if (c instanceof ContainerWrapInterface) {
                     final ContainerWrapInterface cdi = (ContainerWrapInterface) c;
                     switch (Name) {
                         case "WrapDualInterface.FluidPacket":
                             cdi.setFluidPacketInTile(Value.equals("1"));
+                            break;
+                        case "WrapDualInterface.AllowSplitting":
+                            cdi.setAllowSplittingInTile(Value.equals("1"));
+                            break;
+                        case "WrapDualInterface.ExtendedBlockMode":
+                            cdi.setExtendedBlockMode(Integer.parseInt(Value));
+                            break;
+                    }
+                } else if (c instanceof ContainerUltimateEncoder) {
+                    final ContainerUltimateEncoder cue = (ContainerUltimateEncoder) c;
+                    switch (Name) {
+                        case "UltimateEncoder.Encode":
+                            if (Value.equals("0"))
+                                cue.encode();
+                            else
+                                cue.encodeAndMoveToInventory();
+                            break;
+                        case "UltimateEncoder.Clear":
+                            cue.clear();
+                            break;
+                        case "UltimateEncoder.MultiplyByTwo":
+                            cue.multiply(2);
+                            break;
+                        case "UltimateEncoder.MultiplyByThree":
+                            cue.multiply(3);
+                            break;
+                        case "UltimateEncoder.DivideByTwo":
+                            cue.divide(2);
+                            break;
+                        case "UltimateEncoder.DivideByThree":
+                            cue.divide(3);
+                            break;
+                        case "UltimateEncoder.IncreaseByOne":
+                            cue.increase(1);
+                            break;
+                        case "UltimateEncoder.DecreaseByOne":
+                            cue.decrease(1);
+                            break;
+                        case "UltimateEncoder.Combine":
+                            cue.setCombine(Value.equals("1"));
+                            break;
+                        case "UltimateEncoder.Fluid":
+                            cue.setFluidFirst(Value.equals("1"));
                             break;
                     }
                 }

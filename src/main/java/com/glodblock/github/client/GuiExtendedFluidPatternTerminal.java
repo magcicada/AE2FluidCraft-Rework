@@ -14,14 +14,19 @@ import com.glodblock.github.FluidCraft;
 import com.glodblock.github.client.button.GuiFCImgButton;
 import com.glodblock.github.client.container.ContainerExtendedFluidPatternTerminal;
 import com.glodblock.github.client.render.FluidRenderUtils;
-import com.glodblock.github.common.item.ItemFluidPacket;
+import com.glodblock.github.integration.jei.FluidPacketTarget;
+import com.glodblock.github.integration.mek.FCGasItems;
+import com.glodblock.github.integration.mek.GasRenderUtil;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.inventory.InventoryHandler;
 import com.glodblock.github.inventory.slot.SlotSingleItem;
+import com.glodblock.github.loader.FCItems;
 import com.glodblock.github.network.CPacketFluidPatternTermBtns;
 import com.glodblock.github.network.CPacketInventoryAction;
 import com.glodblock.github.util.Ae2ReflectClient;
 import com.glodblock.github.util.ModAndClassUtil;
+import com.glodblock.github.util.UtilClient;
+import mezz.jei.api.gui.IGhostIngredientHandler.Target;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
@@ -29,6 +34,8 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiExtendedFluidPatternTerminal extends GuiExpandedProcessingPatternTerm {
 
@@ -52,15 +59,13 @@ public class GuiExtendedFluidPatternTerminal extends GuiExpandedProcessingPatter
     public void initGui() {
         super.initGui();
         craftingStatusBtn = Ae2ReflectClient.getCraftingStatusButton(this);
-        if (!ModAndClassUtil.NEE) {
-            this.combineEnableBtn = new GuiFCImgButton( this.guiLeft + 74, this.guiTop + this.ySize - 153, "FORCE_COMBINE", "DO_COMBINE" );
-            this.combineEnableBtn.setHalfSize( true );
-            this.buttonList.add( this.combineEnableBtn );
+        this.combineEnableBtn = new GuiFCImgButton( this.guiLeft + 74, this.guiTop + this.ySize - 153, "FORCE_COMBINE", "DO_COMBINE" );
+        this.combineEnableBtn.setHalfSize( true );
+        this.buttonList.add( this.combineEnableBtn );
 
-            this.combineDisableBtn = new GuiFCImgButton( this.guiLeft + 74, this.guiTop + this.ySize - 153, "NOT_COMBINE", "DONT_COMBINE" );
-            this.combineDisableBtn.setHalfSize( true );
-            this.buttonList.add( this.combineDisableBtn );
-        }
+        this.combineDisableBtn = new GuiFCImgButton( this.guiLeft + 74, this.guiTop + this.ySize - 153, "NOT_COMBINE", "DONT_COMBINE" );
+        this.combineDisableBtn.setHalfSize( true );
+        this.buttonList.add( this.combineDisableBtn );
 
         this.fluidEnableBtn = new GuiFCImgButton( this.guiLeft + 74, this.guiTop + this.ySize - 143, "FLUID_FIRST", "FLUID" );
         this.fluidEnableBtn.setHalfSize( true );
@@ -73,36 +78,40 @@ public class GuiExtendedFluidPatternTerminal extends GuiExpandedProcessingPatter
 
     @Override
     public void drawSlot(Slot slot) {
-        if (!(slot instanceof SlotFake && (FluidRenderUtils.renderFluidPacketIntoGuiSlot(
-                slot, slot.getStack(), stackSizeRenderer, fontRenderer) || renderMEStyleSlot(slot, slot.getStack())))) {
+        if (slot instanceof SlotFake) {
+            ItemStack stack = slot.getStack();
+            if (FluidRenderUtils.renderFluidPacketIntoGuiSlot(slot, stack, stackSizeRenderer, fontRenderer)) {
+                return;
+            }
+            if (ModAndClassUtil.GAS && GasRenderUtil.renderGasPacketIntoGuiSlot(slot, stack, stackSizeRenderer, fontRenderer)) {
+                return;
+            }
+            renderMEStyleSlot(slot, slot.getStack());
+        } else {
             super.drawSlot(slot);
         }
     }
 
-    private boolean renderMEStyleSlot(Slot slot, @Nonnull ItemStack stack) {
-        if (slot instanceof SlotFake && !stack.isEmpty() && !(stack.getItem() instanceof ItemFluidPacket)) {
+    private void renderMEStyleSlot(Slot slot, @Nonnull ItemStack stack) {
+        if (slot instanceof SlotFake && !stack.isEmpty() && !(stack.getItem() == FCItems.FLUID_PACKET || (ModAndClassUtil.GAS && stack.getItem() == FCGasItems.GAS_PACKET))) {
             super.drawSlot(new SlotSingleItem(slot));
             if (stack.getCount() > 1) {
                 this.stackSizeRenderer.renderStackSize(fontRenderer, AEItemStack.fromItemStack(stack), slot.xPos, slot.yPos);
             }
-            return true;
         }
-        return false;
     }
 
     @Override
     public void drawFG(int offsetX, int offsetY, int mouseX, int mouseY) {
-        if (!ModAndClassUtil.NEE) {
-            if ( this.container.combine )
-            {
-                this.combineEnableBtn.visible = true;
-                this.combineDisableBtn.visible = false;
-            }
-            else
-            {
-                this.combineEnableBtn.visible = false;
-                this.combineDisableBtn.visible = true;
-            }
+        if ( this.container.combine )
+        {
+            this.combineEnableBtn.visible = true;
+            this.combineDisableBtn.visible = false;
+        }
+        else
+        {
+            this.combineEnableBtn.visible = false;
+            this.combineDisableBtn.visible = true;
         }
 
         if (this.container.fluidFirst)
@@ -140,7 +149,7 @@ public class GuiExtendedFluidPatternTerminal extends GuiExpandedProcessingPatter
                     ((AEBaseContainer) this.inventorySlots).setTargetStack(stack);
                     for (int i = 0; i < this.inventorySlots.inventorySlots.size(); i ++) {
                         if (this.inventorySlots.inventorySlots.get(i).equals(slot)) {
-                            FluidCraft.proxy.netHandler.sendToServer(new CPacketInventoryAction(1, i, 0, stack));
+                            FluidCraft.proxy.netHandler.sendToServer(new CPacketInventoryAction(CPacketInventoryAction.Action.CHANGE_AMOUNT, i, 0, stack));
                             break;
                         }
                     }
@@ -148,7 +157,30 @@ public class GuiExtendedFluidPatternTerminal extends GuiExpandedProcessingPatter
                 }
             }
         }
+        if (UtilClient.shouldAutoCraft(slot, mouseButton, clickType)) {
+            IAEItemStack stack = AEItemStack.fromItemStack(slot.getStack());
+            ((AEBaseContainer) this.inventorySlots).setTargetStack(stack);
+            FluidCraft.proxy.netHandler.sendToServer(new CPacketInventoryAction(CPacketInventoryAction.Action.AUTO_CRAFT, 0, 0, stack));
+            return;
+        }
         super.handleMouseClick(slot, slotIdx, mouseButton, clickType);
+    }
+
+    @Override
+    public List<Target<?>> getPhantomTargets(Object ingredient) {
+        if (FluidPacketTarget.covertFluid(ingredient) != null || FluidPacketTarget.covertGas(ingredient) != null) {
+            List<Target<?>> targets = new ArrayList<>();
+            for (Slot slot : this.inventorySlots.inventorySlots) {
+                if (slot instanceof SlotFake) {
+                    Target<?> target = new FluidPacketTarget(getGuiLeft(), getGuiTop(), slot);
+                    targets.add(target);
+                    mapTargetSlot.putIfAbsent(target, slot);
+                }
+            }
+            return targets;
+        } else {
+            return super.getPhantomTargets(ingredient);
+        }
     }
 
 }

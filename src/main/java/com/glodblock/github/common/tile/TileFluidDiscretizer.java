@@ -1,19 +1,27 @@
 package com.glodblock.github.common.tile;
 
-import appeng.api.AEApi;
 import appeng.api.config.Actionable;
 import appeng.api.networking.GridFlags;
 import appeng.api.networking.crafting.ICraftingGrid;
 import appeng.api.networking.energy.IEnergyGrid;
-import appeng.api.networking.events.*;
+import appeng.api.networking.events.MENetworkCellArrayUpdate;
+import appeng.api.networking.events.MENetworkChannelsChanged;
+import appeng.api.networking.events.MENetworkEventSubscribe;
+import appeng.api.networking.events.MENetworkPowerStatusChange;
+import appeng.api.networking.events.MENetworkStorageEvent;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IBaseMonitor;
 import appeng.api.networking.storage.IStorageGrid;
-import appeng.api.storage.*;
-import appeng.api.storage.channels.IFluidStorageChannel;
-import appeng.api.storage.channels.IItemStorageChannel;
+import appeng.api.storage.ICellContainer;
+import appeng.api.storage.ICellInventory;
+import appeng.api.storage.IMEInventory;
+import appeng.api.storage.IMEInventoryHandler;
+import appeng.api.storage.IMEMonitor;
+import appeng.api.storage.IMEMonitorHandlerReceiver;
+import appeng.api.storage.IStorageChannel;
 import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import appeng.api.storage.data.IItemList;
 import appeng.helpers.Reflected;
 import appeng.me.GridAccessException;
@@ -21,11 +29,12 @@ import appeng.me.cache.CraftingGridCache;
 import appeng.me.helpers.MachineSource;
 import appeng.me.storage.MEInventoryHandler;
 import appeng.tile.grid.AENetworkTile;
-import appeng.util.Platform;
-import com.glodblock.github.common.item.ItemFluidDrop;
+import com.glodblock.github.common.item.fake.FakeFluids;
+import com.glodblock.github.common.item.fake.FakeItemRegister;
+import com.glodblock.github.util.Util;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,12 +64,16 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
     @SuppressWarnings("rawtypes")
     @Override
     public List<IMEInventoryHandler> getCellArray(IStorageChannel<?> channel) {
-        if (getProxy().isActive()) {
-            if (channel == AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class)) {
-                return Collections.singletonList(fluidDropInv.invHandler);
-            } else if (channel == AEApi.instance().storage().getStorageChannel(IFluidStorageChannel.class)) {
-                return Collections.singletonList(fluidCraftInv.invHandler);
+        try {
+            if (getProxy().isActive() && getProxy().getGrid().getMachines(this.getClass()).size() < 2) {
+                if (channel == Util.getItemChannel()) {
+                    return Collections.singletonList(fluidDropInv.invHandler);
+                } else if (channel == Util.getFluidChannel()) {
+                    return Collections.singletonList(fluidCraftInv.invHandler);
+                }
             }
+        } catch (GridAccessException e) {
+            //NO-OP
         }
         return Collections.emptyList();
     }
@@ -122,8 +135,7 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
     @Nullable
     private IMEMonitor<IAEFluidStack> getFluidGrid() {
         try {
-            return getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class)
-                    .getInventory(AEApi.instance().storage().getStorageChannel(IFluidStorageChannel.class));
+            return getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class).getInventory(Util.getFluidChannel());
         } catch (GridAccessException e) {
             return null;
         }
@@ -133,7 +145,7 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
 
         private final MEInventoryHandler<IAEItemStack> invHandler = new MEInventoryHandler<>(this, getChannel());
         @Nullable
-        private List<IAEItemStack> itemCache = null;
+        private ObjectArrayList<IAEItemStack> itemCache = null;
 
         FluidDiscretizingInventory() {
             invHandler.setPriority(Integer.MAX_VALUE);
@@ -143,8 +155,8 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
         @Nullable
         @Override
         public IAEItemStack extractItems(IAEItemStack request, Actionable mode, IActionSource src) {
-            IAEFluidStack fluidStack = ItemFluidDrop.getAeFluidStack(request);
-            if (fluidStack == null) {
+            Object fluidStack = FakeItemRegister.getAEStack(request);
+            if (!(fluidStack instanceof IAEFluidStack)) {
                 return null;
             }
             IMEMonitor<IAEFluidStack> fluidGrid = getFluidGrid();
@@ -155,15 +167,15 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
             if (energyGrid == null) {
                 return null;
             }
-            return ItemFluidDrop.newAeStack(fluidGrid.extractItems(fluidStack, mode, ownActionSource));
+            return FakeFluids.packFluid2AEDrops(fluidGrid.extractItems((IAEFluidStack) fluidStack, mode, ownActionSource));
         }
 
         @SuppressWarnings("DuplicatedCode")
         @Nullable
         @Override
         public IAEItemStack injectItems(IAEItemStack input, Actionable type, IActionSource src) {
-            IAEFluidStack fluidStack = ItemFluidDrop.getAeFluidStack(input);
-            if (fluidStack == null) {
+            Object fluidStack = FakeItemRegister.getAEStack(input);
+            if (!(fluidStack instanceof IAEFluidStack)) {
                 return input;
             }
             IMEMonitor<IAEFluidStack> fluidGrid = getFluidGrid();
@@ -174,17 +186,17 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
             if (energyGrid == null) {
                 return input;
             }
-            return ItemFluidDrop.newAeStack(fluidGrid.injectItems(fluidStack, type, ownActionSource));
+            return FakeFluids.packFluid2AEDrops(fluidGrid.injectItems((IAEFluidStack) fluidStack, type, ownActionSource));
         }
 
         @Override
         public IItemList<IAEItemStack> getAvailableItems(IItemList<IAEItemStack> out) {
             if (itemCache == null) {
-                itemCache = new ArrayList<>();
+                itemCache = new ObjectArrayList<>();
                 IMEMonitor<IAEFluidStack> fluidGrid = getFluidGrid();
                 if (fluidGrid != null) {
                     for (IAEFluidStack fluid : fluidGrid.getStorageList()) {
-                        IAEItemStack stack = ItemFluidDrop.newAeStack(fluid);
+                        IAEItemStack stack = FakeFluids.packFluid2AEDrops(fluid);
                         if (stack != null) {
                             itemCache.add(stack);
                         }
@@ -207,21 +219,20 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
         public void postChange(IBaseMonitor<IAEFluidStack> monitor, Iterable<IAEFluidStack> change, IActionSource actionSource) {
             itemCache = null;
             try {
-                List<IAEItemStack> mappedChanges = new ArrayList<>();
+                ObjectArrayList<IAEItemStack> mappedChanges = new ObjectArrayList<>();
                 for (IAEFluidStack fluidStack : change) {
                     boolean isNg = false;
                     if (fluidStack.getStackSize() < 0) {
                         isNg = true;
-                        fluidStack.setStackSize( - fluidStack.getStackSize() );
+                        fluidStack.setStackSize(-fluidStack.getStackSize());
                     }
-                    IAEItemStack itemStack = ItemFluidDrop.newAeStack(fluidStack);
+                    IAEItemStack itemStack = FakeFluids.packFluid2AEDrops(fluidStack);
                     if (itemStack != null) {
-                        if (isNg) itemStack.setStackSize( - itemStack.getStackSize() );
+                        if (isNg) itemStack.setStackSize(-itemStack.getStackSize());
                         mappedChanges.add(itemStack);
                     }
                 }
-                getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class)
-                        .postAlterationOfStoredItems(getChannel(), mappedChanges, ownActionSource);
+                getProxy().getGrid().<IStorageGrid>getCache(IStorageGrid.class).postAlterationOfStoredItems(getChannel(), mappedChanges, ownActionSource);
             } catch (GridAccessException e) {
                 // NO-OP
             }
@@ -234,14 +245,15 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
 
         @Override
         public IStorageChannel<IAEItemStack> getChannel() {
-            return AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class);
+            return Util.getItemChannel();
         }
 
     }
 
-    private class FluidCraftingInventory implements IMEInventory<IAEFluidStack> {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private class FluidCraftingInventory implements IMEInventory {
 
-        private final MEInventoryHandler<IAEFluidStack> invHandler = new MEInventoryHandler<>(this, getChannel());
+        private final MEInventoryHandler invHandler = new MEInventoryHandler<>(this, this.getChannel());
 
         FluidCraftingInventory() {
             invHandler.setPriority(Integer.MAX_VALUE);
@@ -249,7 +261,11 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
 
         @Nullable
         @Override
-        public IAEFluidStack injectItems(IAEFluidStack input, Actionable type, IActionSource src) {
+        public IAEStack injectItems(IAEStack aeStack, Actionable type, IActionSource src) {
+            if (!(aeStack instanceof IAEFluidStack)) {
+                return null;
+            }
+            IAEFluidStack input = (IAEFluidStack) aeStack;
             ICraftingGrid craftingGrid;
             try {
                 craftingGrid = getProxy().getGrid().getCache(ICraftingGrid.class);
@@ -257,10 +273,9 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
                 return null;
             }
             if (craftingGrid instanceof CraftingGridCache) {
-                IAEItemStack remaining = ((CraftingGridCache)craftingGrid).injectItems(
-                        ItemFluidDrop.newAeStack(input), type, ownActionSource);
+                IAEItemStack remaining = ((CraftingGridCache)craftingGrid).injectItems(FakeFluids.packFluid2AEDrops(input), type, ownActionSource);
                 if (remaining != null) {
-                    return ItemFluidDrop.getAeFluidStack(remaining);
+                    return FakeItemRegister.getAEStack(remaining);
                 }
             }
             return null;
@@ -268,18 +283,18 @@ public class TileFluidDiscretizer extends AENetworkTile implements ICellContaine
 
         @Nullable
         @Override
-        public IAEFluidStack extractItems(IAEFluidStack request, Actionable mode, IActionSource src) {
+        public IAEStack extractItems(IAEStack request, Actionable mode, IActionSource src) {
             return null;
         }
 
         @Override
-        public IItemList<IAEFluidStack> getAvailableItems(IItemList<IAEFluidStack> out) {
+        public IItemList getAvailableItems(IItemList out) {
             return out;
         }
 
         @Override
         public IStorageChannel<IAEFluidStack> getChannel() {
-            return AEApi.instance().storage().getStorageChannel(IFluidStorageChannel.class);
+            return Util.getFluidChannel();
         }
 
     }

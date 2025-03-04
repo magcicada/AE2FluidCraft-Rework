@@ -2,14 +2,13 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "appliedenergistics2:interface"
+      "item": "#appliedenergistics2:interface"
     },
     {
-      "item": "appliedenergistics2:fluid_interface"
+      "item": "#appliedenergistics2:fluid_interface"
     }
   ],
   "result": {
-    "item": "ae2fc:dual_interface",
-    "nbt": {}
+    "item": "ae2fc:dual_interface"
   }
 }

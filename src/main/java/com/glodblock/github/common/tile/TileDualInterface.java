@@ -12,6 +12,7 @@ import appeng.api.networking.events.MENetworkPowerStatusChange;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
+import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
@@ -23,14 +24,17 @@ import appeng.helpers.DualityInterface;
 import appeng.helpers.IInterfaceHost;
 import appeng.tile.grid.AENetworkInvTile;
 import appeng.util.Platform;
+import appeng.util.SettingsFrom;
 import appeng.util.inv.IInventoryDestination;
 import appeng.util.inv.InvOperation;
 import com.glodblock.github.common.component.DualityDualInterface;
+import com.glodblock.github.common.item.fake.FakeFluids;
 import com.glodblock.github.interfaces.FCPriorityHost;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.loader.FCBlocks;
 import com.google.common.collect.ImmutableSet;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -47,17 +51,17 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 
-public class TileDualInterface extends AENetworkInvTile
-        implements IGridTickable, IInventoryDestination, IInterfaceHost, FCPriorityHost, IFluidInterfaceHost {
+public class TileDualInterface extends AENetworkInvTile implements IGridTickable, IInventoryDestination, IInterfaceHost, FCPriorityHost, IFluidInterfaceHost {
 
     public TileDualInterface() {
         super();
     }
 
-    private final DualityDualInterface<TileDualInterface> duality = new DualityDualInterface<>(getProxy(), this);
+    @SuppressWarnings("unchecked")
+    protected final DualityDualInterface<TileDualInterface> duality = createDuality();
 
     // Indicates that this interface has no specific direction set
-    private boolean omniDirectional = true;
+    protected boolean omniDirectional = true;
 
     @MENetworkEventSubscribe
     public void stateChange(final MENetworkChannelsChanged c) {
@@ -67,6 +71,11 @@ public class TileDualInterface extends AENetworkInvTile
     @MENetworkEventSubscribe
     public void stateChange(final MENetworkPowerStatusChange c) {
         duality.onPowerStateChange(c);
+    }
+
+    @SuppressWarnings("rawtypes")
+    protected DualityDualInterface createDuality() {
+        return new DualityDualInterface<>(getProxy(), this);
     }
 
     public void setSide(final EnumFacing facing) {
@@ -125,7 +134,6 @@ public class TileDualInterface extends AENetworkInvTile
     @Override
     public void onReady() {
         this.configureNodeSides();
-
         super.onReady();
         duality.initialize();
     }
@@ -202,6 +210,16 @@ public class TileDualInterface extends AENetworkInvTile
     public void onChangeInventory(final IItemHandler inv, final int slot, final InvOperation mc,
                                   final ItemStack removed, final ItemStack added) {
         duality.onItemInventoryChange(inv, slot, mc, removed, added);
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEFluidStack stack) {
+        duality.getItemInterface().onStackReturnedToNetwork(FakeFluids.packFluid2AEDrops(stack));
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEItemStack stack) {
+        duality.getItemInterface().onStackReturnedToNetwork(stack);
     }
 
     @Override
@@ -304,6 +322,22 @@ public class TileDualInterface extends AENetworkInvTile
     @Override
     public GuiType getGuiType() {
         return GuiType.DUAL_ITEM_INTERFACE;
+    }
+
+    @Override
+    public NBTTagCompound downloadSettings(SettingsFrom from) {
+        NBTTagCompound pre = super.downloadSettings(from);
+        NBTTagCompound tag = pre == null ? new NBTTagCompound() : pre;
+        tag.setTag("pattern", this.duality.downloadSettings(from));
+        return tag.isEmpty() ? null : tag;
+    }
+
+    @Override
+    public void uploadSettings(SettingsFrom from, NBTTagCompound compound, EntityPlayer player) {
+        super.uploadSettings(from, compound, player);
+        if (compound.hasKey("pattern")) {
+            this.duality.uploadSettings(compound.getCompoundTag("pattern"), player);
+        }
     }
 
 }

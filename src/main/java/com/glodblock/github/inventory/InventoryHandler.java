@@ -3,7 +3,6 @@ package com.glodblock.github.inventory;
 import appeng.core.AELog;
 import com.glodblock.github.FluidCraft;
 import com.glodblock.github.network.CPacketSwitchGuis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -39,7 +38,7 @@ public class InventoryHandler implements IGuiHandler {
         }
         EnumFacing face = EnumFacing.VALUES[faceOrd];
         GuiType type = GuiType.getByOrdinal(id >>> 3);
-        return type != null ? type.guiFactory.createServerGui(player, world, x, y, z, face) : null;
+        return type != null ? type.getFactory().createServerGui(player, world, x, y, z, face) : null;
     }
 
     @SideOnly(Side.CLIENT)
@@ -52,7 +51,7 @@ public class InventoryHandler implements IGuiHandler {
         }
         EnumFacing face = EnumFacing.VALUES[faceOrd];
         GuiType type = GuiType.getByOrdinal(id >>> 3);
-        return type != null ? type.guiFactory.createClientGui(player, world, x, y, z, face) : null;
+        return type != null ? type.getFactory().createClientGui(player, world, x, y, z, face) : null;
     }
 
 }

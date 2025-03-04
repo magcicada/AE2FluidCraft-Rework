@@ -24,6 +24,10 @@ public class FCBlocks {
     public static BlockDualInterface DUAL_INTERFACE;
     @GameRegistry.ObjectHolder(FluidCraft.MODID + ":" + NameConst.BLOCK_FLUID_LEVEL_MAINTAINER)
     public static BlockFluidLevelMaintainer FLUID_LEVEL_MAINTAINER;
+    @GameRegistry.ObjectHolder(FluidCraft.MODID + ":" + NameConst.BLOCK_FLUID_ASSEMBLER)
+    public static BlockFluidAssembler FLUID_ASSEMBLER;
+    @GameRegistry.ObjectHolder(FluidCraft.MODID + ":" + NameConst.BLOCK_ULTIMATE_ENCODER)
+    public static BlockUltimateEncoder ULTIMATE_ENCODER;
 
     public static void init(RegistryHandler regHandler) {
         regHandler.block(NameConst.BLOCK_FLUID_DISCRETIZER, new BlockFluidDiscretizer());
@@ -34,6 +38,8 @@ public class FCBlocks {
         regHandler.block(NameConst.BLOCK_BURETTE, new BlockBurette());
         regHandler.block(NameConst.BLOCK_DUAL_INTERFACE, new BlockDualInterface());
         regHandler.block(NameConst.BLOCK_FLUID_LEVEL_MAINTAINER, new BlockFluidLevelMaintainer());
+        regHandler.block(NameConst.BLOCK_FLUID_ASSEMBLER, new BlockFluidAssembler());
+        regHandler.block(NameConst.BLOCK_ULTIMATE_ENCODER, new BlockUltimateEncoder());
     }
 
 }

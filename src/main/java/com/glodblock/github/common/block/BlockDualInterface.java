@@ -6,6 +6,7 @@ import appeng.util.Platform;
 import com.glodblock.github.common.tile.TileDualInterface;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.inventory.InventoryHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
@@ -14,6 +15,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -82,4 +84,11 @@ public class BlockDualInterface extends AEBaseTileBlock {
         }
     }
 
+    @Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        TileEntity tileEntity = this.getTileEntity(worldIn, pos);
+        if (tileEntity instanceof TileDualInterface) {
+            ((TileDualInterface) tileEntity).getInterfaceDuality().updateRedstoneState();
+        }
+    }
 }

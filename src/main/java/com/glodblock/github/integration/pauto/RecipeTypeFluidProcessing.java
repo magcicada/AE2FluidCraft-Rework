@@ -1,11 +1,13 @@
 package com.glodblock.github.integration.pauto;
 
 import com.glodblock.github.FluidCraft;
-import com.glodblock.github.common.item.ItemFluidPacket;
-import com.glodblock.github.integration.jei.FCJeiPlugin;
-import com.glodblock.github.integration.jei.WrappedIngredient;
+import com.glodblock.github.common.item.fake.FakeFluids;
 import com.glodblock.github.loader.FCBlocks;
-import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import mezz.jei.api.gui.IGuiIngredient;
 import mezz.jei.api.gui.IRecipeLayout;
 import net.minecraft.item.ItemStack;
@@ -20,7 +22,6 @@ import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
 
 import java.awt.*;
-import java.util.Iterator;
 import java.util.List;
 
 public class RecipeTypeFluidProcessing implements IRecipeType {
@@ -123,24 +124,11 @@ public class RecipeTypeFluidProcessing implements IRecipeType {
         for (IGuiIngredient<FluidStack> ing : recipeLayout.getFluidStacks().getGuiIngredients().values()) {
             if (ing.isInput()) {
                 if (ndxCrafting < NUM_SLOTS_CRAFT) {
-                    tfrs.put(ndxCrafting++, ItemFluidPacket.newStack(ing.getDisplayedIngredient()));
+                    tfrs.put(ndxCrafting++, FakeFluids.packFluid2Packet(ing.getDisplayedIngredient()));
                 }
             } else {
                 if (ndxOutput < NUM_SLOTS_OUT) {
-                    tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, ItemFluidPacket.newStack(ing.getDisplayedIngredient()));
-                }
-            }
-        }
-        Iterator<WrappedIngredient<FluidStack>> iter = FCJeiPlugin.getExtraExtractors().extractFluids(recipeLayout).iterator();
-        while (iter.hasNext()) {
-            WrappedIngredient<FluidStack> ing = iter.next();
-            if (ing.isInput()) {
-                if (ndxCrafting < NUM_SLOTS_CRAFT) {
-                    tfrs.put(ndxCrafting++, ItemFluidPacket.newStack(ing.getIngredient()));
-                }
-            } else {
-                if (ndxOutput < NUM_SLOTS_OUT) {
-                    tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, ItemFluidPacket.newStack(ing.getIngredient()));
+                    tfrs.put(NUM_SLOTS_CRAFT + ndxOutput++, FakeFluids.packFluid2Packet(ing.getDisplayedIngredient()));
                 }
             }
         }

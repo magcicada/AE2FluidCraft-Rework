@@ -1,21 +1,25 @@
 package com.glodblock.github.client;
 
 import appeng.api.storage.ITerminalHost;
+import appeng.client.gui.MathExpressionParser;
 import appeng.client.gui.implementations.GuiCraftAmount;
-import appeng.client.gui.widgets.GuiNumberBox;
 import appeng.client.gui.widgets.GuiTabButton;
 import appeng.container.AEBaseContainer;
+import appeng.helpers.WirelessTerminalGuiObject;
 import com.glodblock.github.FluidCraft;
 import com.glodblock.github.client.container.ContainerItemAmountChange;
 import com.glodblock.github.common.part.PartExtendedFluidPatternTerminal;
 import com.glodblock.github.common.part.PartFluidPatternTerminal;
+import com.glodblock.github.common.tile.TileUltimateEncoder;
 import com.glodblock.github.inventory.GuiType;
+import com.glodblock.github.loader.FCBlocks;
 import com.glodblock.github.loader.FCItems;
 import com.glodblock.github.network.CPacketPatternValueSet;
 import com.glodblock.github.network.CPacketSwitchGuis;
 import com.glodblock.github.util.Ae2ReflectClient;
 import com.glodblock.github.util.NameConst;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -25,7 +29,7 @@ public class GuiItemAmountChange extends GuiCraftAmount {
     private GuiType originalGui;
     private GuiTabButton originalGuiBtn;
     private GuiButton next;
-    private GuiNumberBox amountToCraft;
+    private GuiTextField amountToCraft;
     private GuiButton plus1;
     private GuiButton plus10;
     private GuiButton plus100;
@@ -48,6 +52,14 @@ public class GuiItemAmountChange extends GuiCraftAmount {
         this.originalGuiBtn = Ae2ReflectClient.getGuiCraftAmountBackButton(this);
         this.buttonList.remove(this.originalGuiBtn);
 
+        if (target instanceof WirelessTerminalGuiObject) {
+            ItemStack tool = ((WirelessTerminalGuiObject) target).getItemStack();
+            if (tool.getItem() == FCItems.WIRELESS_FLUID_PATTERN_TERMINAL) {
+                myIcon = new ItemStack(FCItems.WIRELESS_FLUID_PATTERN_TERMINAL);
+                this.originalGui = GuiType.WIRELESS_FLUID_PATTERN_TERMINAL;
+            }
+        }
+
         if (target instanceof PartFluidPatternTerminal) {
             myIcon = new ItemStack(FCItems.PART_FLUID_PATTERN_TERMINAL);
             this.originalGui = GuiType.FLUID_PATTERN_TERMINAL;
@@ -56,6 +68,11 @@ public class GuiItemAmountChange extends GuiCraftAmount {
         if (target instanceof PartExtendedFluidPatternTerminal) {
             myIcon = new ItemStack(FCItems.PART_EXTENDED_FLUID_PATTERN_TERMINAL);
             this.originalGui = GuiType.FLUID_EXTENDED_PATTERN_TERMINAL;
+        }
+
+        if (target instanceof TileUltimateEncoder) {
+            myIcon = new ItemStack(FCBlocks.ULTIMATE_ENCODER);
+            this.originalGui = GuiType.ULTIMATE_ENCODER;
         }
 
         if (this.originalGui != null && myIcon != null) {
@@ -96,7 +113,15 @@ public class GuiItemAmountChange extends GuiCraftAmount {
 
             if( btn == this.next )
             {
-                FluidCraft.proxy.netHandler.sendToServer( new CPacketPatternValueSet(this.originalGui, Integer.parseInt(this.amountToCraft.getText()), ((ContainerItemAmountChange) this.inventorySlots).getValueIndex()));
+                String text = Ae2ReflectClient.getGuiCraftAmountTextBox(this).getText();
+                double resultD = MathExpressionParser.parse(text);
+                int result;
+                if (resultD <= 0 || Double.isNaN(resultD)) {
+                    result = 1;
+                } else {
+                    result = (int) MathExpressionParser.round(resultD, 0);
+                }
+                FluidCraft.proxy.netHandler.sendToServer( new CPacketPatternValueSet(this.originalGui, result, ((ContainerItemAmountChange) this.inventorySlots).getValueIndex()));
             }
         }
         catch( final NumberFormatException e )

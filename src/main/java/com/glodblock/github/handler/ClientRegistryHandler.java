@@ -2,12 +2,17 @@ package com.glodblock.github.handler;
 
 import appeng.api.AEApi;
 import com.glodblock.github.FluidCraft;
+import com.glodblock.github.client.model.DenseCraftEncodedPatternModel;
 import com.glodblock.github.client.model.DenseEncodedPatternModel;
 import com.glodblock.github.client.model.FluidPacketModel;
+import com.glodblock.github.client.model.GasPacketModel;
+import com.glodblock.github.client.model.LargeItemEncodedPatternModel;
 import com.glodblock.github.common.part.PartDualInterface;
 import com.glodblock.github.common.part.PartExtendedFluidPatternTerminal;
 import com.glodblock.github.common.part.PartFluidPatternTerminal;
+import com.glodblock.github.common.part.PartTrioInterface;
 import com.glodblock.github.interfaces.HasCustomModel;
+import com.glodblock.github.util.ModAndClassUtil;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -22,7 +27,13 @@ public class ClientRegistryHandler extends RegistryHandler {
     @SubscribeEvent
     public void onRegisterModels(ModelRegistryEvent event) {
         ModelLoaderRegistry.registerLoader(new DenseEncodedPatternModel.Loader());
+        ModelLoaderRegistry.registerLoader(new DenseCraftEncodedPatternModel.Loader());
+        ModelLoaderRegistry.registerLoader(new LargeItemEncodedPatternModel.Loader());
         ModelLoaderRegistry.registerLoader(new FluidPacketModel.Loader());
+        if (ModAndClassUtil.GAS) {
+            ModelLoaderRegistry.registerLoader(new GasPacketModel.Loader());
+            AEApi.instance().registries().partModels().registerModels(PartTrioInterface.MODELS);
+        }
         for (Pair<String, Block> entry : blocks) {
             registerModel(entry.getLeft(), Item.getItemFromBlock(entry.getRight()));
         }

@@ -3,7 +3,9 @@ package com.glodblock.github.common.part;
 import appeng.api.networking.crafting.ICraftingPatternDetails;
 import appeng.api.parts.IPartModel;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IItemList;
 import appeng.core.sync.GuiBridge;
+import appeng.items.misc.ItemEncodedPattern;
 import appeng.items.parts.PartModels;
 import appeng.parts.PartModel;
 import appeng.parts.reporting.PartPatternTerminal;
@@ -11,13 +13,21 @@ import appeng.tile.inventory.AppEngInternalInventory;
 import appeng.util.Platform;
 import appeng.util.inv.InvOperation;
 import com.glodblock.github.FluidCraft;
-import com.glodblock.github.common.item.ItemFluidDrop;
+import com.glodblock.github.common.item.ItemFluidCraftEncodedPattern;
 import com.glodblock.github.common.item.ItemFluidEncodedPattern;
-import com.glodblock.github.common.item.ItemFluidPacket;
+import com.glodblock.github.common.item.ItemLargeEncodedPattern;
+import com.glodblock.github.common.item.fake.FakeFluids;
+import com.glodblock.github.common.item.fake.FakeItemRegister;
+import com.glodblock.github.integration.mek.FCGasItems;
+import com.glodblock.github.integration.mek.FakeGases;
 import com.glodblock.github.inventory.ExAppEngInternalInventory;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.inventory.InventoryHandler;
-import com.glodblock.github.util.Ae2Reflect;
+import com.glodblock.github.loader.FCItems;
+import com.glodblock.github.util.FluidCraftingPatternDetails;
+import com.glodblock.github.util.ModAndClassUtil;
+import com.glodblock.github.util.Util;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,8 +37,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 public class PartFluidPatternTerminal extends PartPatternTerminal {
 
@@ -111,9 +123,9 @@ public class PartFluidPatternTerminal extends PartPatternTerminal {
                                   ItemStack newStack) {
         if (slot == 1) {
             final ItemStack is = inv.getStackInSlot(1);
-            if (!is.isEmpty() && is.getItem() instanceof ItemFluidEncodedPattern) {
-                final ItemFluidEncodedPattern pattern = (ItemFluidEncodedPattern) is.getItem();
-                final ICraftingPatternDetails details = pattern.getPatternForItem( is, this.getHost().getTile().getWorld() );
+            if (!is.isEmpty() && (is.getItem() instanceof ItemFluidEncodedPattern || is.getItem() instanceof ItemFluidCraftEncodedPattern || is.getItem() instanceof ItemLargeEncodedPattern)) {
+                final ItemEncodedPattern pattern = (ItemEncodedPattern) is.getItem();
+                final ICraftingPatternDetails details = pattern.getPatternForItem(is, this.getHost().getTile().getWorld());
                 if( details != null )
                 {
                     this.setCraftingRecipe( details.isCraftable() );
@@ -126,25 +138,11 @@ public class PartFluidPatternTerminal extends PartPatternTerminal {
                     for( int x = 0; x < this.getInventoryByName("output").getSlots(); x ++ ) {
                         ((AppEngInternalInventory) this.getInventoryByName("output")).setStackInSlot(x, ItemStack.EMPTY);
                     }
-
-                    for( int x = 0; x < this.getInventoryByName("crafting").getSlots() && x < details.getInputs().length; x++ )
-                    {
-                        final IAEItemStack item = details.getInputs()[x];
-                        if (item != null && item.getItem() instanceof ItemFluidDrop) {
-                            ItemStack packet = ItemFluidPacket.newStack(ItemFluidDrop.getFluidStack(item.createItemStack()));
-                            ((AppEngInternalInventory) this.getInventoryByName("crafting")).setStackInSlot(x, packet);
-                        }
-                        else ((AppEngInternalInventory) this.getInventoryByName("crafting")).setStackInSlot( x, item == null ? ItemStack.EMPTY : item.createItemStack() );
-                    }
-
-                    for( int x = 0; x < this.getInventoryByName("output").getSlots() && x < details.getOutputs().length; x++ )
-                    {
-                        final IAEItemStack item = details.getOutputs()[x];
-                        if (item != null && item.getItem() instanceof ItemFluidDrop) {
-                            ItemStack packet = ItemFluidPacket.newStack(ItemFluidDrop.getFluidStack(item.createItemStack()));
-                            ((AppEngInternalInventory) this.getInventoryByName("output")).setStackInSlot(x, packet);
-                        }
-                        else ((AppEngInternalInventory) this.getInventoryByName("output")).setStackInSlot( x, item == null ? ItemStack.EMPTY : item.createItemStack() );
+                    if (details instanceof FluidCraftingPatternDetails) {
+                        putPattern(((FluidCraftingPatternDetails) details).getOriginInputs(), details.getOutputs());
+                        this.setCraftingRecipe( true );
+                    } else {
+                        putPattern(details.getInputs(), details.getOutputs());
                     }
                 }
                 this.getHost().markForSave();
@@ -154,20 +152,56 @@ public class PartFluidPatternTerminal extends PartPatternTerminal {
         super.onChangeInventory(inv, slot, mc, removedStack, newStack);
     }
 
-    public void onChangeCrafting(IAEItemStack[] newCrafting, IAEItemStack[] newOutput) {
+    public void putPattern(IAEItemStack[] inputs, IAEItemStack[] outputs) {
+        for( int x = 0; x < this.getInventoryByName("crafting").getSlots() && x < inputs.length; x++ )
+        {
+            final IAEItemStack item = inputs[x];
+            if (item != null && item.getItem() == FCItems.FLUID_DROP) {
+                ItemStack packet = FakeFluids.packFluid2Packet(FakeItemRegister.getStack(item.createItemStack()));
+                ((AppEngInternalInventory) this.getInventoryByName("crafting")).setStackInSlot(x, packet);
+            } else if (ModAndClassUtil.GAS && item != null && item.getItem() == FCGasItems.GAS_DROP) {
+                ItemStack packet = FakeGases.packGas2Packet(FakeItemRegister.getStack(item.createItemStack()));
+                ((AppEngInternalInventory) this.getInventoryByName("crafting")).setStackInSlot(x, packet);
+            } else ((AppEngInternalInventory) this.getInventoryByName("crafting")).setStackInSlot( x, item == null ? ItemStack.EMPTY : item.createItemStack() );
+        }
+
+        for( int x = 0; x < this.getInventoryByName("output").getSlots() && x < outputs.length; x++ )
+        {
+            final IAEItemStack item = outputs[x];
+            if (item != null && item.getItem() == FCItems.FLUID_DROP) {
+                ItemStack packet = FakeFluids.packFluid2Packet(FakeItemRegister.getStack(item.createItemStack()));
+                ((AppEngInternalInventory) this.getInventoryByName("output")).setStackInSlot(x, packet);
+            } else if (ModAndClassUtil.GAS && item != null && item.getItem() == FCGasItems.GAS_DROP) {
+                ItemStack packet = FakeGases.packGas2Packet(FakeItemRegister.getStack(item.createItemStack()));
+                ((AppEngInternalInventory) this.getInventoryByName("output")).setStackInSlot(x, packet);
+            } else ((AppEngInternalInventory) this.getInventoryByName("output")).setStackInSlot( x, item == null ? ItemStack.EMPTY : item.createItemStack() );
+        }
+    }
+
+    public void onChangeCrafting(Int2ObjectMap<ItemStack[]> inputs, List<ItemStack> outputs, boolean combine) {
         IItemHandler crafting = this.getInventoryByName("crafting");
         IItemHandler output = this.getInventoryByName("output");
+        IItemList<IAEItemStack> storageList = this.getInventory(Util.getItemChannel()) == null ?
+                null : this.getInventory(Util.getItemChannel()).getStorageList();
         if (crafting instanceof AppEngInternalInventory && output instanceof AppEngInternalInventory) {
-            for (int x = 0; x < crafting.getSlots() && x < newCrafting.length; x++) {
-                final IAEItemStack item = newCrafting[x];
-                ((AppEngInternalInventory)crafting)
-                        .setStackInSlot(x, item == null ? ItemStack.EMPTY : item.createItemStack());
+            Util.clearItemInventory((IItemHandlerModifiable) crafting);
+            Util.clearItemInventory((IItemHandlerModifiable) output);
+            ItemStack[] fuzzyFind = new ItemStack[Util.findMax(inputs.keySet()) + 1];
+            for (int index : inputs.keySet()) {
+                Util.fuzzyTransferItems(index, inputs.get(index), fuzzyFind, storageList);
             }
-
-            for (int x = 0; x < output.getSlots() && x < newOutput.length; x++) {
-                final IAEItemStack item = newOutput[x];
-                ((AppEngInternalInventory)output)
-                        .setStackInSlot(x, item == null ? ItemStack.EMPTY : item.createItemStack());
+            if (combine && !this.craftingMode) {
+                fuzzyFind = Util.compress(fuzzyFind);
+            }
+            int bound = Math.min(crafting.getSlots(), fuzzyFind.length);
+            for (int x = 0; x < bound; x++) {
+                final ItemStack item = fuzzyFind[x];
+                ((AppEngInternalInventory) crafting).setStackInSlot(x, item == null ? ItemStack.EMPTY : item);
+            }
+            bound = Math.min(output.getSlots(), outputs.size());
+            for (int x = 0; x < bound; x++) {
+                final ItemStack item = outputs.get(x);
+                ((AppEngInternalInventory) output).setStackInSlot(x, item == null ? ItemStack.EMPTY : item);
             }
         }
     }

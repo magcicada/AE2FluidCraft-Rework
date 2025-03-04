@@ -14,6 +14,7 @@ import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartModel;
+import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.util.AECableType;
 import appeng.api.util.IConfigManager;
@@ -26,11 +27,13 @@ import appeng.items.parts.PartModels;
 import appeng.parts.PartBasicState;
 import appeng.parts.PartModel;
 import appeng.util.Platform;
+import appeng.util.SettingsFrom;
 import appeng.util.inv.IAEAppEngInventory;
 import appeng.util.inv.IInventoryDestination;
 import appeng.util.inv.InvOperation;
 import com.glodblock.github.FluidCraft;
 import com.glodblock.github.common.component.DualityDualInterface;
+import com.glodblock.github.common.item.fake.FakeFluids;
 import com.glodblock.github.interfaces.FCPriorityHost;
 import com.glodblock.github.inventory.GuiType;
 import com.glodblock.github.inventory.InventoryHandler;
@@ -44,7 +47,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.IItemHandler;
 
@@ -68,7 +73,8 @@ public class PartDualInterface extends PartBasicState
     public static final PartModel MODELS_ON = new PartModel(MODELS[0], MODELS[1]);
     public static final PartModel MODELS_HAS_CHANNEL = new PartModel(MODELS[0], MODELS[3]);
 
-    private final DualityDualInterface<PartDualInterface> duality = new DualityDualInterface<>(getProxy(), this);
+    @SuppressWarnings("unchecked")
+    protected final DualityDualInterface<PartDualInterface> duality = createDuality();
 
     @Reflected
     public PartDualInterface(final ItemStack is) {
@@ -83,6 +89,11 @@ public class PartDualInterface extends PartBasicState
     @MENetworkEventSubscribe
     public void stateChange(final MENetworkPowerStatusChange c) {
         duality.onPowerStateChange(c);
+    }
+
+    @SuppressWarnings("rawtypes")
+    protected DualityDualInterface createDuality() {
+        return new DualityDualInterface<>(getProxy(), this);
     }
 
     @Override
@@ -169,6 +180,16 @@ public class PartDualInterface extends PartBasicState
     public void onChangeInventory(final IItemHandler inv, final int slot, final InvOperation mc,
                                   final ItemStack removedStack, final ItemStack newStack) {
         duality.onItemInventoryChange(inv, slot, mc, removedStack, newStack);
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEFluidStack stack) {
+        this.duality.getItemInterface().onStackReturnedToNetwork(FakeFluids.packFluid2AEDrops(stack));
+    }
+
+    @Override
+    public void onStackReturnNetwork(IAEItemStack stack) {
+        this.duality.getItemInterface().onStackReturnedToNetwork(stack);
     }
 
     @Override
@@ -261,6 +282,30 @@ public class PartDualInterface extends PartBasicState
             return MODELS_ON;
         } else {
             return MODELS_OFF;
+        }
+    }
+
+    @Override
+    public NBTTagCompound downloadSettings(SettingsFrom from) {
+        NBTTagCompound pre = super.downloadSettings(from);
+        NBTTagCompound tag = pre == null ? new NBTTagCompound() : pre;
+        tag.setTag("pattern", this.duality.downloadSettings(from));
+        return tag.isEmpty() ? null : tag;
+    }
+
+    @Override
+    public void uploadSettings(SettingsFrom from, NBTTagCompound compound, EntityPlayer player) {
+        super.uploadSettings(from, compound, player);
+        if (compound.hasKey("pattern")) {
+            this.duality.uploadSettings(compound.getCompoundTag("pattern"), player);
+        }
+    }
+
+    @Override
+    public void onNeighborChanged(IBlockAccess w, BlockPos pos, BlockPos neighbor) {
+        TileEntity tileEntity = getTileEntity();
+        if (tileEntity instanceof IInterfaceHost) {
+            ((IInterfaceHost) tileEntity).getInterfaceDuality().updateRedstoneState();
         }
     }
 

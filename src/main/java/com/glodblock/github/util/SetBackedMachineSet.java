@@ -5,19 +5,37 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.IMachineSet;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.Spliterator;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class SetBackedMachineSet implements IMachineSet {
 
     private final Class<? extends IGridHost> machineClass;
-    private final Set<IGridNode> backingSet;
+    private final List<IMachineSet> backingSet = new ArrayList<>();
+    private int count;
 
-    public SetBackedMachineSet(Class<? extends IGridHost> machineClass, Set<IGridNode> backingSet) {
+    public static IMachineSet combine(Class<? extends IGridHost> machineClass, IMachineSet... backingSet) {
+        SetBackedMachineSet packed = new SetBackedMachineSet(machineClass, backingSet);
+        if (packed.backingSet.isEmpty()) {
+            return EmptyMachineSet.create(machineClass);
+        }
+        if (packed.backingSet.size() == 1) {
+            return packed.backingSet.get(0);
+        }
+        return packed;
+    }
+
+    private SetBackedMachineSet(Class<? extends IGridHost> machineClass, IMachineSet... backingSet) {
         this.machineClass = machineClass;
-        this.backingSet = backingSet;
+        this.count = 0;
+        for (IMachineSet set : backingSet) {
+            if (!set.isEmpty()) {
+                this.count += set.size();
+                this.backingSet.add(set);
+            }
+        }
     }
 
     @Nonnull
@@ -28,34 +46,76 @@ public class SetBackedMachineSet implements IMachineSet {
 
     @Override
     public int size() {
-        return backingSet.size();
+        return this.count;
     }
 
     @Override
     public boolean isEmpty() {
-        return backingSet.isEmpty();
+        for (IMachineSet set : this.backingSet) {
+            if (!set.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean contains(Object o) {
-        //noinspection SuspiciousMethodCalls
-        return backingSet.contains(o);
+        for (IMachineSet set : this.backingSet) {
+            if (set.contains(o)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     @Nonnull
     public Iterator<IGridNode> iterator() {
-        return backingSet.iterator();
+        return new CombinedIterator();
     }
 
     @Override
     public void forEach(Consumer<? super IGridNode> action) {
-        backingSet.forEach(action);
+        for (IMachineSet set : this.backingSet) {
+            set.forEach(action);
+        }
     }
 
-    @Override
-    public Spliterator<IGridNode> spliterator() {
-        return backingSet.spliterator();
+    private class CombinedIterator implements Iterator<IGridNode> {
+        Iterator<IGridNode> currentIter;
+        final Iterator<Iterator<IGridNode>> iterators;
+
+        CombinedIterator() {
+            List<Iterator<IGridNode>> list = new ArrayList<>();
+            for (IMachineSet set : SetBackedMachineSet.this.backingSet) {
+                list.add(set.iterator());
+            }
+            this.iterators = list.iterator();
+            this.nextSet();
+        }
+
+        private void nextSet() {
+            currentIter = iterators.next();
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (currentIter.hasNext()) {
+                return true;
+            }
+            if (iterators.hasNext()) {
+                this.nextSet();
+                return this.hasNext();
+            }
+            return false;
+        }
+
+        @Override
+        public IGridNode next() {
+            return currentIter.next();
+        }
+
     }
 
 }
